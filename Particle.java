@@ -1,4 +1,10 @@
-
+/**
+ * Particle.java
+ * @author amk
+ *
+ * A single particle in a particle filter for localization
+ */
+ 
 public class Particle {
 	private double xCoord;
 	private double yCoord;

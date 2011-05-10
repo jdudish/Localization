@@ -13,11 +13,13 @@ public class Localizer extends Thread {
 	private boolean localized;
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
+	
 	public Localizer() {
 		localized = false;
 		particleList = new ArrayList<Particle>();
 		expectedLocation = null;
 	}
+	
 	public void predict(double[] scan) {
 		//Require: A set of Particles for Robot i at time 0:
 		// S^0_i = [X_j,W_j: j = 1...M].
@@ -51,6 +53,14 @@ public class Localizer extends Thread {
 	}
 	public void resample(double weight) {
 		
+	}
+	
+	/**
+	 * What this thread does when it runs, yo
+	 */
+	@Override
+	public void run() {
+	
 	}
 	
 }
