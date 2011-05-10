@@ -51,10 +51,48 @@ public class Localizer extends Thread {
 	public void update() {
 
 	}
-	public void resample(double weight) {
-		
+	public double resample(double[] weight) {
+		// require sumofi=1 to N (Wi) = 1
+		if (sumOf(weight) != 1) {
+			return -1;
+		}
+		// Q = sumsum(W); 
+		double[] q = cumsum(weight);
+		// t = rand(N+1);
+		double[] t = randArray(weight.length+1);
+		// T = sort(t);
+		//T(N+1) = 1; i = 1; j = 1
+		// while( i <= N) do
+		//  if T[i] < Q[j] then
+		//    Index[i] = j;
+		//    i++;
+		//  else
+		//    j++;
+		//  end if
+		// end while
+		// Return(Index)
+		return 0;
 	}
-	
+	/*
+	 * Calculate running totals :
+	 * array[j] = sumof[l=0,j](list[l])
+	 */
+	public double[] cumsum(double[] list) {
+		double sum = 0;
+		double[] array = new double[list.length];
+		for (int i = 0; i < list.length; i++) {
+			sum += list[i];
+			array[i] = sum;
+		}
+		return array;
+	}
+	public double sumOf(double[] array) {
+		double sum = 0;
+		for (int i = 0; i < array.length;i++) {
+			sum += array[i];
+		}
+		return sum;
+	}
 	/**
 	 * What this thread does when it runs, yo
 	 */
