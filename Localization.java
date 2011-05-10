@@ -65,10 +65,40 @@ import javaclient3.structures.ranger.*;
         return map;
     }
     
+    /**
+     * Takes in a configuration space map (assuming the robot is a point) and
+     * returns a workspace map (assuming the robot has a 10cm radius). This
+     * lazily expands all the obstacles by 5cm in all directions
+     *
+     * @param map   the configuration space map as a 2D integer array
+     * @return      the workspace map as a 2D integer array
+     */
+    public static int[][] getWorkspaceMap(int[][] map) {
+        int[][] wsMap = new int[map.length][map[0].length];
+        
+        for (int x = 0; x < wsMap.length; x++) {
+            for (int y = 0; y < wsMap[0].length; y++) {
+                if (map[x][y] == 0) {
+                    for (int i = 0; i < 5; i++) {
+                        for (int j = 0; j < 5; j++) {
+                            if (map[x+i][y+j] != 0)
+                                wsMap[x+i][y+j] = 0;
+                        }
+                    }
+                } else {
+                    wsMap[x][y] = map[x][y];
+            }
+        }
+        
+        return wsMap;
+    }
+    
     
     public static void main(String[] args) {
         int[][] map = getMap(args[0]);
+        int[][] wsMap = getWorkspaceMap(map);
         System.out.println(Arrays.deepToString(map));
+        System.out.println(Arrays.deeptoString(wsMap));
         
         // copypasta initalization stuff from other jawns
         PlayerClient pc;
