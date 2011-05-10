@@ -22,7 +22,7 @@ public class LocGoto {
 		double turnrate = 0, speed = 0;
 		double omega = 20*Math.PI/180;
 		int ptCount = 0;
-		double[] currTarget = wps.get( ptCount );
+		Point currTarget = wps.get( ptCount );
 		boolean reached = false;
 
 
@@ -42,30 +42,35 @@ public class LocGoto {
 				speed = 0;
 				turnrate = 0;
 				// TODO: Rather exit or just allow the user to kill the program when they want?
-			}else if( reached ) { // If we have reached our current target, increase the 
-				ptCount++;    // point counter and see if we have any remaining points to hit
-				if( ptCount != wps.size() ) { // If there are remaining points, update current target
-					currTarget = pts.get( ptCount );
+			}else if( reached ) { 
+				// If we have reached our current target, increase the 
+				// point counter and see if we have any remaining points to hit
+				ptCount++;
+				// If there are remaining points, update current target
+				if( ptCount != wps.size() ) {
+					currTarget = wps.get( ptCount );
 					reached = false;
 					speed = 0;
 					turnrate = 0;
-				}else { // Else stop
+				}
+				// Else stop
+				else {
 					speed = 0;
 					turnrate = 0;
 				}
-			}else { // We have not reached our target, so carry on!
-				double xToGo = currTarget[0] - pos.getX();
-				double yToGo = currTarget[1] - pos.getY();
+			}else { 
+				// We have not reached our target, so carry on!
+				double xToGo = currTarget.getX() - pos.getX();
+				double yToGo = currTarget.getY() - pos.getY();
 				double hypToGo = Math.sqrt( Math.pow(xToGo,2) + Math.pow(yToGo,2) );
 				double angle = Math.atan2( yToGo, xToGo );
 				System.out.println( "HypToGo: " + hypToGo );
 				System.out.println( "AngleDif: " + Math.abs( angle - pos.getYaw() ) );
 
-				double closest = Double.MAX_VALUE;
-				int closestLaser = 0;
-
 				// Only working with every 5 lasers just to cut down on data being processed
 				// Just looking for the closest obstacle
+				double closest = Double.MAX_VALUE;
+				int closestLaser = 0;
 				for( int i = 0; i < ranges.length; i += 5 ) {
 					if( ranges[i] < closest ) {
 						closest = ranges[i];
@@ -75,8 +80,8 @@ public class LocGoto {
 
 				// Angle of the laser beam relative to the world (in the same coordinates as the robot),
             			// not with respect to the robot.
-		            	double sampleTheta = i * RADIAN_PER_LASER - LASER_ROBOT_OFFSET + position[2];
-            			// Components of the current sample
+		            	double sampleTheta = closestLaser * Localization.RADIAN_PER_LASER - Localization.LASER_ROBOT_OFFSET + pos.getYaw();
+            			// Components of the obstacle.
             			double xComponent = Math.cos(sampleTheta);
             			double yComponent = Math.sin(sampleTheta);
 
