@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -51,27 +52,51 @@ public class Localizer extends Thread {
 	public void update() {
 
 	}
-	public double resample(double[] weight) {
+	public double effectiveSampleSize(double weight,int m) {
+		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
+		double ess = m / (1 + coeffVariance(t))
+		return 0;
+	}
+	public int[] resample(double[] weight) {
+		int[] index = new int[weight.length];
 		// require sumofi=1 to N (Wi) = 1
 		if (sumOf(weight) != 1) {
-			return -1;
+			return null;
 		}
 		// Q = sumsum(W); 
 		double[] q = cumsum(weight);
 		// t = rand(N+1);
-		double[] t = randArray(weight.length+1);
+		double[] t = randArray(weight.length+1); // t is an array of N+1 random numbers
 		// T = sort(t);
+		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
+		int i = 1;
+		int j = 1;
 		// while( i <= N) do
+		while( i <= weight.length) {
 		//  if T[i] < Q[j] then
-		//    Index[i] = j;
-		//    i++;
+			if (t[i] < q[j]) { 
+				// Index[i] = j;
+				index[i] = j;
+				// i++
+				i++;
+			} else {
 		//  else
-		//    j++;
+				// j++;
+				j++;
+			}
 		//  end if
 		// end while
+		}
 		// Return(Index)
-		return 0;
+		return index;
+	}
+	public double[] randArray(int size) {
+		double[] array = new double[size];
+		for (int i = 0; i < size;i ++) {
+			array[i] = Math.random();
+		}
+		return array;
 	}
 	/*
 	 * Calculate running totals :
