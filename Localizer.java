@@ -52,10 +52,18 @@ public class Localizer extends Thread {
 	public void update() {
 
 	}
-	public double effectiveSampleSize(double weight,int m) {
+	public double effectiveSampleSize(double[] weight) {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
-		double ess = m / (1 + coeffVariance(t))
-		return 0;
+		double ess = weight.length / (1 + coeffVariance(weight));
+		return ess;
+	}
+	public double coeffVariance(double [] weight) {
+		double c = 0;
+		for (int i = 0; i < weight.length; i++) {
+			c += Math.pow((weight.length * weight[i])-1,2); 
+		}
+		c = c * (1.0/weight.length);
+		return c;
 	}
 	public int[] resample(double[] weight) {
 		int[] index = new int[weight.length];
