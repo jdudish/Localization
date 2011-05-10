@@ -19,6 +19,19 @@ import javaclient3.structures.PlayerConstants;
 import javaclient3.structures.ranger.*;
  
  public class Localization {
+
+    /**
+     * Used for determining the angle that each laser beam fires at.
+     */
+    public final static double RADIAN_PER_LASER = 0.00615094;
+    /**
+     * This is the offset in radians needed because the 0th sample is not at 0 radians
+     */
+    public final static double LASER_ROBOT_OFFSET = 2.094395102;
+    /**
+     * Scale of the input map in meters/pixel (pulled from the .world file for the project)
+     */
+    public final static double MAP_METERS_PER_PIXEL = 0.02;
     
     /**
      * Loads in the map from an external file. Does some number fudging,

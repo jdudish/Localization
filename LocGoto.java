@@ -13,7 +13,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 public class LocGoto {
-	public static void executePath( PlayerClient pc, ArrayList<Point> wps ) {
+
+	public static void executePath( PlayerClient pc, ArrayList<Point> wps, int[][] map ) {
 
 		Position2DInterface pos = pc.requestInterfacePosition2D(0,PlayerConstants.PLAYER_OPEN_MODE);
 		RangerInterface ranger = pc.requestInterfaceRanger( 0, PlayerConstants.PLAYER_OPEN_MODE );
@@ -62,6 +63,7 @@ public class LocGoto {
 
 				double closest = Double.MAX_VALUE;
 				int closestLaser = 0;
+
 				// Only working with every 5 lasers just to cut down on data being processed
 				// Just looking for the closest obstacle
 				for( int i = 0; i < ranges.length; i += 5 ) {
@@ -70,6 +72,13 @@ public class LocGoto {
 						closestLaser = i;
 					}
 				}
+
+				// Angle of the laser beam relative to the world (in the same coordinates as the robot),
+            			// not with respect to the robot.
+		            	double sampleTheta = i * RADIAN_PER_LASER - LASER_ROBOT_OFFSET + position[2];
+            			// Components of the current sample
+            			double xComponent = Math.cos(sampleTheta);
+            			double yComponent = Math.sin(sampleTheta);
 
 				if( hypToGo < .05 ) {
 					reached = true;
