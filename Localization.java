@@ -87,6 +87,7 @@ import javaclient3.structures.ranger.*;
                     }
                 } else {
                     wsMap[x][y] = map[x][y];
+                }
             }
         }
         
@@ -107,9 +108,11 @@ import javaclient3.structures.ranger.*;
         else
             pc = new PlayerClient(args[1],Integer.valueOf(args[2]));
     
-        Position2DInterface pos = pc.requestInterfacePosition2D(0,PlayerConstants.PLAYER_OPEN_MODE);
+        Position2DInterface pos = 
+            pc.requestInterfacePosition2D(0,PlayerConstants.PLAYER_OPEN_MODE);
     
-        RangerInterface ranger = pc.requestInterfaceRanger(0,PlayerConstants.PLAYER_OPEN_MODE);
+        RangerInterface ranger = 
+            pc.requestInterfaceRanger(0,PlayerConstants.PLAYER_OPEN_MODE);
         
         /* So as not to potentially overload the ranger interface, we should
          * probably pass the localizer to the wanderer and have the wanderer
@@ -168,4 +171,4 @@ import javaclient3.structures.ranger.*;
 //             pos.setSpeed(fwd,turnrate);
 //         }
     }
- }
+}
