@@ -166,7 +166,7 @@ public class Localizer extends Thread {
 	    return weights;
 	}
 	
-	public void receiveUpdate(double dx, double dy, double dYaw,
+	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
 	    double[] ranges) {
 	    
 	    this.dx = dx;
