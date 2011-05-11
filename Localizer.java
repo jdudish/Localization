@@ -14,6 +14,9 @@ public class Localizer extends Thread {
     public static final int NUM_PARTICLES = 10000;
 
 	private boolean localized;
+	private double dx,dy,dYaw;
+	private int[][] map;
+	private double[] ranges;
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
 	private static double particleTolerance = .95;
@@ -24,11 +27,13 @@ public class Localizer extends Thread {
 	 * mapw*maph particles, whichever is smaller. All particles are initalized
 	 * with equal weight, 1 divided by the number of particles.
 	 *
-	 * @param   mapw    the width of the map in pixels
-	 * @param   maph    the height of the map in pixels
+	 * @param   map the map!
 	 */
-	public Localizer(int mapw, int maph) {
+	public Localizer(int[][] map) {
 		localized = false;
+		this.map = map;
+		int mapw = map.length;
+		int maph = map[0].length;
 		int numParticles = (NUM_PARTICLES > mapw*maph) ? 
 		    mapw*maph : NUM_PARTICLES;
 		int ppp = Math.round(mapw*maph/numParticles);   // pixels per particle
@@ -160,6 +165,16 @@ public class Localizer extends Thread {
 	    }
 	    return weights;
 	}
+	
+	public void receiveUpdate(double dx, double dy, double dYaw,
+	    double[] ranges) {
+	    
+	    this.dx = dx;
+	    this.dy = dy;
+	    this.dYaw = dYaw;
+	    this.ranges = ranges;
+	}
+
 	
 	/**
 	 * What this thread does when it runs, yo
