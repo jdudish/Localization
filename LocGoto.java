@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class LocGoto {
 
-	public static void executePath( PlayerClient pc, ArrayList<Point> wps, int[][] map ) {
+	public static void executePath( PlayerClient pc, ArrayList<Point> wps ) {
 
 		Position2DInterface pos = pc.requestInterfacePosition2D(0,PlayerConstants.PLAYER_OPEN_MODE);
 		RangerInterface ranger = pc.requestInterfaceRanger( 0, PlayerConstants.PLAYER_OPEN_MODE );
@@ -51,14 +51,9 @@ public class LocGoto {
 				if( ptCount != wps.size() ) {
 					currTarget = wps.get( ptCount );
 					reached = false;
-					speed = 0;
-					turnrate = 0;
 				}
-				// Else stop
-				else {
-					speed = 0;
-					turnrate = 0;
-				}
+				speed = 0;
+				turnrate = 0;
 			}else { 
 				/*
 				// We have not reached our target, so carry on!
@@ -93,7 +88,8 @@ public class LocGoto {
 				//Now for potential field stuff.
 				//Alter the percieved distance of the obstacle to pretend we are in workspace
 				double obsDistance = ranges[closestLaser] - 0.1;
-				double obsTheta = closestLaser * Localization.RADIAN_PER_LASER - Localization.LASER_ROBOT_OFFSET + pos.getYaw();
+				double obsTheta = closestLaser * Localization.RADIAN_PER_LASER - 
+					Localization.LASER_ROBOT_OFFSET + pos.getYaw();
 				//X and Y position relative to the robot;
 				double obsX = Math.cos(obsTheta) * obsDistance;
 				double obsY = Math.sin(obsTheta) * obsDistance;
@@ -102,34 +98,27 @@ public class LocGoto {
 				double obsForceY = (-obsY) / Math.pow(obsDistance,3);
 
 				double goalForceX = (currTarget.getX() - pos.getX()) / 
-					Math.pow(Math.sqrt(Math.pow(currTarget.getX() - pos.getX(),2) + Math.pow(currTarget.getY() - pos.getY(),2)),3);
+					Math.pow(Math.sqrt(Math.pow(currTarget.getX() - 
+					pos.getX(),2) + Math.pow(currTarget.getY() - pos.getY(),2)),3);
 				double goalForceY = (currTarget.getY() - pos.getY()) /
-					Math.pow(Math.sqrt(Math.pow(currTarget.getX() - pos.getX(),2) + Math.pow(currTarget.getY() - pos.getY(),2)),3);
+					Math.pow(Math.sqrt(Math.pow(currTarget.getX() - 
+					pos.getX(),2) + Math.pow(currTarget.getY() - pos.getY(),2)),3);
 
-				double robotFX = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceX + Localization.GOAL_POTENTIAL_CONSTANT * goalForceX;
-				double robotFY = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceY + Localization.GOAL_POTENTIAL_CONSTANT * goalForceY;
+				//Force exerted on the robot
+				double robotFX = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceX + 
+					Localization.GOAL_POTENTIAL_CONSTANT * goalForceX;
+				double robotFY = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceY + 
+					Localization.GOAL_POTENTIAL_CONSTANT * goalForceY;
+				double robotForce = Math.sqrt( robotFX*robotFX + robotFY*robotFY );
+				double robotForceAngle = Math.atan2(robotFY, robotFX);
 
-
-				if( hypToGo < .05 ) {
-					reached = true;
-					speed = 0;
-					turnrate = 0;
-				}else {
-					if( Math.abs( angle - pos.getYaw() ) > .2 ) {
-						speed = 0;
-                                                double tmpturn = Math.abs( angle - pos.getYaw() )*omega;
-                                                turnrate = Math.max( tmpturn, .1 );
-					}else {
-                                                double tmpspeed = hypToGo*.25;
-						tmpspeed = Math.min( tmpspeed, .2 );
-                                                speed = Math.max( tmpspeed, .025 );
-						turnrate = 0;
-					}
-				}
+				//Now to translate to speed and turnrate for the robot.
+				speed = 0.15;
+				turnrate = (robotForceAngle - pos.getYaw())*robotForce;
 			}
-	    		/*System.out.printf( "(%7f,%7f,%7f)\n",
-			      pos.getX(),pos.getY(),pos.getYaw() );
-			pos.setSpeed(speed, turnrate);*/
+	    		//System.out.printf( "(%7f,%7f,%7f)\n",
+			//      pos.getX(),pos.getY(),pos.getYaw() );
+			pos.setSpeed(speed, turnrate);
 		}
 	}//executePath
 } //LocGoto.java
