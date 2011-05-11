@@ -188,7 +188,9 @@ public class Localizer extends Thread {
 	public void run() {
 	    while (!localized) {
 	        if (!updateReady) {
-	            wait();
+	            try {
+	                wait();
+	            } catch (InterruptedException e) {}
 	            continue;
 	        }
 	        /* I think this is the right order...
