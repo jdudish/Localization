@@ -63,5 +63,6 @@ public class Wanderer extends Thread {
                 		}
             		}
             		pos.setSpeed(fwd, turnrate);
+		}
 	}// run()
 }// Wanderer.java
