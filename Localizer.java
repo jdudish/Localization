@@ -52,6 +52,7 @@ public class Localizer extends Thread {
 		}
 		expectedLocation = null;
 		updateReady = false;
+		
 		drawMap();
 		gmap.repaint();
 
@@ -99,6 +100,11 @@ public class Localizer extends Thread {
 		//   for(j=1 to M) do {Normalize the weights}
 		//     W^k+1_j = (W^k+1_j)/(Sumi=1 to M (W^k+1_i))
 		//   end for
+		
+		for (Particle p : particleList) {
+		    double weight = p.getWeight() * prob(p,ranges);
+		    p.setWeight(weight);
+		}
 	}
 	public double effectiveSampleSize() {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
@@ -146,6 +152,12 @@ public class Localizer extends Thread {
 		}
 		// Return(Index)
 		return index;
+	}
+	
+	private double prob(Particle p, double[] ranges) {
+	    double prob = 0.0;
+	    
+	    return prob;
 	}
 	public double[] randArray(int size) {
 		double[] array = new double[size];
