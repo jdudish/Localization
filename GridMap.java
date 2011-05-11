@@ -59,7 +59,7 @@ public class GridMap extends JFrame {
         // flip y to go from right-handed world to left-handed image
         int imy = (int)(imheight/2 - y/scale);
         if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight)
-            theMap.setRGB(imx,imy,Color.RED);
+            theMap.setRGB(imx,imy,Color.RED.getRGB());
     }
     
     void clearParticle(double x, double y) {
@@ -67,7 +67,7 @@ public class GridMap extends JFrame {
         // flip y to go from right-handed world to left-handed image
         int imy = (int)(imheight/2 - y/scale);
         if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight)
-            theMap.setRGB(imx,imy,Color.WHITE);
+            theMap.setRGB(imx,imy,Color.WHITE.getRGB());
     }
 
     class MapPanel extends JPanel {
