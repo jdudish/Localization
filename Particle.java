@@ -45,7 +45,12 @@ public class Particle {
 	public void setPose(double h) {
 		pose = h;
 	}
-	
+	public void setWeight(double w) {
+		weight = w;
+	}
+	public double getWeight() {
+		return weight;
+	}
 	public void move(double x, double y, double h) {
 		xCoord = x;
 		yCoord = y;
