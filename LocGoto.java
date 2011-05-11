@@ -87,7 +87,7 @@ public class LocGoto {
 
 				//Now for potential field stuff.
 				//Alter the percieved distance of the obstacle to pretend we are in workspace
-				double obsDistance = ranges[closestLaser] - 0.1;
+				double obsDistance = ranges[closestLaser] - 0.165;
 				double obsTheta = closestLaser * Localization.RADIAN_PER_LASER - 
 					Localization.LASER_ROBOT_OFFSET + pos.getYaw();
 				//X and Y position relative to the robot;
