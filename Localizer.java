@@ -17,6 +17,7 @@ public class Localizer extends Thread {
 	private boolean updateReady;
 	private double dx,dy,dYaw;
 	private int[][] map;
+	private GridMap gmap;
 	private double[] ranges;
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
@@ -30,7 +31,7 @@ public class Localizer extends Thread {
 	 *
 	 * @param   map the map!
 	 */
-	public Localizer(int[][] map) {
+	public Localizer(int[][] map, GridMap gmap) {
 		localized = false;
 		this.map = map;
 		int mapw = map.length;
@@ -43,6 +44,7 @@ public class Localizer extends Thread {
 		double weight = 1.0/numParticles;
 		
 		for (int i = 0; i < numParticles; i++) {
+		    if (map[x][y] == 0) continue;   // Can't be in an obstacle, silly
 		    particleList.add(i, new Particle(x, y, 0, weight));
 		    x = (x+ppp) % mapw;
 		    if (x < ppp) y ++;
@@ -179,6 +181,12 @@ public class Localizer extends Thread {
 	    updateReady = true;
 	    notifyAll();
 	}
+	
+	public void drawMap() {
+	    for (Particle p : particleList) {
+	        gmap.setParticle(p.getX(), p.getY());
+	    }
+	}
 
 	
 	/**
@@ -193,7 +201,9 @@ public class Localizer extends Thread {
 	            } catch (InterruptedException e) {}
 	            continue;
 	        }
+	        updateReady = false;
 	        /* I think this is the right order...
+	        @TODO Make sure this is right, then do it, son.
 	        
 	        predict
 	        update

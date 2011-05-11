@@ -1,6 +1,6 @@
 /**
  * Localization.java
- * @author jmd
+ * @author jmd  11/05/11
  * 
  * Main class for localization. Herp derp.
  */
@@ -124,6 +124,10 @@ import javaclient3.structures.ranger.*;
         }
         System.out.printf("Original Obstacle Pixels: %d\n" +
             "Workspace Obstacle Pixels: %d\n", mapObs, csMapObs);
+            
+        GridMap gmap = new GridMap(map.length,map[0].length,
+            MAP_METERS_PER_PIXEL);
+        
         
         // copypasta initalization stuff from other jawns
         /*
@@ -147,7 +151,7 @@ import javaclient3.structures.ranger.*;
          * Or we would just let them independently abuse the ranger and pos.
          * Whatever.
          */
-        Localizer loc = new Localizer(map);
+        Localizer loc = new Localizer(map,gmap);
         //Wanderer w = new Wanderer(pc,pos,ranger,loc);
         
         // loc.start();
