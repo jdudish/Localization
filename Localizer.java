@@ -143,6 +143,9 @@ public class Localizer extends Thread {
 		}
 		return sum;
 	}
+	public boolean isLocalized() {
+		return localized;
+	}
 	/**
 	 * What this thread does when it runs, yo
 	 */
