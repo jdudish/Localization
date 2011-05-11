@@ -84,46 +84,46 @@ import javaclient3.structures.ranger.*;
      * @return      the workspace map as a 2D integer array
      */
     public static int[][] getWorkspaceMap(int[][] map) {
-        int[][] wsMap = new int[map.length][map[0].length];
+        int[][] csMap = new int[map.length][map[0].length];
         
-        for (int x = 0; x < wsMap.length; x++) {
-            for (int y = 0; y < wsMap[0].length; y++) {
+        for (int x = 0; x < csMap.length; x++) {
+            for (int y = 0; y < csMap[0].length; y++) {
                 if (map[x][y] == 0) {
-                    for (int i = -5; i < 5; i++) {
-                        for (int j = -5; j < 5; j++) {
+                    for (int i = -9; i < 9; i++) {
+                        for (int j = -9; j < 9; j++) {
                             if (x+i < 0 || y+j < 0) continue;
                             if (map[x+i][y+j] != 0)
-                                wsMap[x+i][y+j] = 0;
+                                csMap[x+i][y+j] = 0;
                         }
                     }
                 } else {
-                    wsMap[x][y] = map[x][y];
+                    csMap[x][y] = map[x][y];
                 }
             }
         }
         
-        return wsMap;
+        return csMap;
     }
     
     
     public static void main(String[] args) {
         int[][] map = getMap(args[0]);
-        int[][] wsMap = getWorkspaceMap(map);
+        int[][] csMap = getWorkspaceMap(map);
 //        System.out.println("map = " + Arrays.deepToString(map));
 //        System.out.println();
-        System.out.println("wsMap = " + Arrays.deepToString(wsMap));
+        System.out.println("csMap = " + Arrays.deepToString(csMap));
         
         // Testing junk...
         // @TODO Remove this at some point
-        int mapObs = 0, wsMapObs = 0;
+        int mapObs = 0, csMapObs = 0;
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 if (map[i][j] == 0) mapObs++;
-                if (wsMap[i][j] == 0) wsMapObs++;
+                if (csMap[i][j] == 0) csMapObs++;
             }
         }
         System.out.printf("Original Obstacle Pixels: %d\n" +
-            "Workspace Obstacle Pixels: %d\n", mapObs, wsMapObs);
+            "Workspace Obstacle Pixels: %d\n", mapObs, csMapObs);
         
         // copypasta initalization stuff from other jawns
         /*
