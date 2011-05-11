@@ -116,17 +116,19 @@ import javaclient3.structures.ranger.*;
         // Testing junk...
         // @TODO Remove this at some point
         int mapObs = 0, csMapObs = 0;
+        GridMap gmap = new GridMap(map.length,map[0].length,1);
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 if (map[i][j] == 0) mapObs++;
                 if (csMap[i][j] == 0) csMapObs++;
+                gmap.setVal(i,j,map[i][j]);
             }
         }
         System.out.printf("Original Obstacle Pixels: %d\n" +
             "Workspace Obstacle Pixels: %d\n", mapObs, csMapObs);
-            
-        GridMap gmap = new GridMap(map.length,map[0].length,
-            MAP_METERS_PER_PIXEL);
+        
+        gmap.pack();
+        gmap.setVisible(true);
         
         
         // copypasta initalization stuff from other jawns

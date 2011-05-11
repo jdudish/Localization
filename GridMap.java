@@ -45,9 +45,9 @@ public class GridMap extends JFrame {
     void setVal(double x, double y, int value) {
         if (value < 0 || value > 255)
             return;
-        int imx = (int)(x/scale + imwidth/2);
+        int imx = (int)(x/scale);
         // flip y to go from right-handed world to left-handed image
-        int imy = (int)(imheight/2 - y/scale);
+        int imy = (int)(y/scale);
         //int rgbval = (0xff << 24) | (ival << 16) | (ival << 8) | ival;
         int rgbval = (0xff << 24) | (value << 16) | (value << 8) | value;
         if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight)
@@ -55,17 +55,17 @@ public class GridMap extends JFrame {
     }
     
     void setParticle(double x, double y) {
-        int imx = (int)(x/scale + imwidth/2);
+        int imx = (int)(x/scale);
         // flip y to go from right-handed world to left-handed image
-        int imy = (int)(imheight/2 - y/scale);
+        int imy = (int)(y/scale);
         if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight)
             theMap.setRGB(imx,imy,Color.RED.getRGB());
     }
     
     void clearParticle(double x, double y) {
-        int imx = (int)(x/scale + imwidth/2);
+        int imx = (int)(x/scale);
         // flip y to go from right-handed world to left-handed image
-        int imy = (int)(imheight/2 - y/scale);
+        int imy = (int)(y/scale);
         if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight)
             theMap.setRGB(imx,imy,Color.WHITE.getRGB());
     }

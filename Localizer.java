@@ -34,6 +34,7 @@ public class Localizer extends Thread {
 	public Localizer(int[][] map, GridMap gmap) {
 		localized = false;
 		this.map = map;
+		this.gmap = gmap;
 		int mapw = map.length;
 		int maph = map[0].length;
 		int numParticles = (NUM_PARTICLES > mapw*maph) ? 
@@ -44,13 +45,15 @@ public class Localizer extends Thread {
 		double weight = 1.0/numParticles;
 
 		for (int i = 0; i < numParticles; i++) {
-		    if (map[x][y] == 0) continue;   // Can't be in an obstacle, silly
-		    particleList.add(i, new Particle(x, y, 0, weight));
+		    if (map[x][y] != 0)   // Can't be in an obstacle, silly
+		        particleList.add(new Particle(x, y, 0, weight));
 		    x = (x+ppp) % mapw;
 		    if (x < ppp) y ++;
 		}
 		expectedLocation = null;
 		updateReady = false;
+		drawMap();
+		gmap.repaint();
 
 	}
 
@@ -66,10 +69,11 @@ public class Localizer extends Thread {
 		//   for (j = 1 to M) do {Prediction after action A}
 		int m = particleList.size();
 		for (int j = 0; j < m; j++) {
-			// ********
-			// TODO - Here is where we should clear the coordinates of this particle
-			//**********
+
 			Particle temp = particleList.get(j);
+			
+			gmap.clearParticle(temp.getX(),temp.getY());
+			
 			double tx = temp.getX() + dx;
 			double ty = temp.getY() + dy;
 			double tp = temp.getPose() + dYaw;
@@ -77,9 +81,9 @@ public class Localizer extends Thread {
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
 			temp.move(tx, ty, tp);
-			// *************
-			// TODO - Here is where we should set the new coordinates of this particle
-			//*******
+            
+            gmap.setParticle(temp.getX(),temp.getY());
+            
 			//     X^k+1_j = F(X^k_j,A)
 			particleList.set(j, temp);
 			//   end for
@@ -219,6 +223,7 @@ public class Localizer extends Thread {
 	        predict
 	        update
 	        if (effectiveSampleSize() < threshold) resample;
+	        
 
 			 */
 		}
