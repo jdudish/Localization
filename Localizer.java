@@ -14,6 +14,7 @@ public class Localizer extends Thread {
     public static final int NUM_PARTICLES = 10000;
 
 	private boolean localized;
+	private boolean updateReady;
 	private double dx,dy,dYaw;
 	private int[][] map;
 	private double[] ranges;
@@ -47,6 +48,7 @@ public class Localizer extends Thread {
 		    if (x < ppp) y ++;
 		}
 		expectedLocation = null;
+		updateReady = false;
 
 	}
 	
@@ -173,6 +175,9 @@ public class Localizer extends Thread {
 	    this.dy = dy;
 	    this.dYaw = dYaw;
 	    this.ranges = ranges;
+	    
+	    updateReady = true;
+	    notifyAll();
 	}
 
 	
@@ -181,9 +186,19 @@ public class Localizer extends Thread {
 	 */
 	@Override
 	public void run() {
-	    /*
-	    
-	    */
+	    while (!localized) {
+	        if (!updateReady) {
+	            wait();
+	            continue;
+	        }
+	        /* I think this is the right order...
+	        
+	        predict
+	        update
+	        if (effectiveSampleSize() < threshold) resample;
+	        
+	        */
+	    }
 	}
 	
 }
