@@ -56,7 +56,10 @@ public class Particle {
 		yCoord = y;
 		pose = h;
 	}
-	
+	public Particle clone() {
+		Particle returnMe = new Particle(xCoord,yCoord,pose,weight);
+		return returnMe;
+	}
 	@Override
 	public String toString() {
 	    String s = "Particle @ (" + xCoord + ", " + yCoord + ", " + pose + ")";

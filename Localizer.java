@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 
 public class Localizer extends Thread {
-    public static final int NUM_PARTICLES = 10000;
+	public static final int NUM_PARTICLES = 10000;
 
 	private boolean localized;
 	private boolean updateReady;
@@ -22,7 +22,7 @@ public class Localizer extends Thread {
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
 	private static double particleTolerance = .95;
-	
+
 	/**
 	 * Create a new Localizer object to be used in a map with the given
 	 * dimensions. Fills the list of particles with NUM_PARTICLES particles or
@@ -37,12 +37,12 @@ public class Localizer extends Thread {
 		int mapw = map.length;
 		int maph = map[0].length;
 		int numParticles = (NUM_PARTICLES > mapw*maph) ? 
-		    mapw*maph : NUM_PARTICLES;
+				mapw*maph : NUM_PARTICLES;
 		int ppp = Math.round(mapw*maph/numParticles);   // pixels per particle
 		particleList = new ArrayList<Particle>(numParticles);
 		int x = 0, y = 0;
 		double weight = 1.0/numParticles;
-		
+
 		for (int i = 0; i < numParticles; i++) {
 		    if (map[x][y] == 0) continue;   // Can't be in an obstacle, silly
 		    particleList.add(i, new Particle(x, y, 0, weight));
@@ -53,31 +53,43 @@ public class Localizer extends Thread {
 		updateReady = false;
 
 	}
-	
-	public void predict(double[] scan) {
-		//
-		//   k = k + 1;
-		//   if (ESS(W) < B * M) then {Particle Population Depleted}
-		if (effectiveSampleSize() < (particleTolerance*particleList.size())) {
-		//     Index Resample(W);
-			int[] index = resample();
-			// Create new particles identical to those in index. (Not sure how we want to do this yet)
-		//     S^k_i = S^k_i(Index);
-		//   end if
+
+	public void predict() {
+		// Do we have enough particles?
+		if (effectiveSampleSize() < particleTolerance * particleList.size()) {
+			int[] indexCopyList = resample();
+			for (int i = 0; i < indexCopyList.length; i++) {
+				Particle temp = (Particle) particleList.get(i).clone();
+				particleList.add(temp);
+			}
 		}
 		//   for (j = 1 to M) do {Prediction after action A}
-		//     X^k+1_j = F(X^k_j,A)
-		//   end for
-		//   s = Sense()
-		//
-		//
-		//
+		int m = particleList.size();
+		for (int j = 0; j < m; j++) {
+			// ********
+			// TODO - Here is where we should clear the coordinates of this particle
+			//**********
+			Particle temp = particleList.get(j);
+			double tx = temp.getX() + dx;
+			double ty = temp.getY() + dy;
+			double tp = temp.getPose() + dYaw;
+			// If we are greater than pi, wrap around to negatives.
+			if (tp > Math.PI)
+				tp = tp - 2*Math.PI;
+			temp.move(tx, ty, tp);
+			// *************
+			// TODO - Here is where we should set the new coordinates of this particle
+			//*******
+			//     X^k+1_j = F(X^k_j,A)
+			particleList.set(j, temp);
+			//   end for
+		}
 	}
 	/*
 	 * This will update and normalize the weights
 	 */
 	public void update() {
-	//   for(j = 1 to M) do {Update the weights}
+		//   for(j = 1 to M) do {Update the weights}
 		//      W^k+1_j  = W^K_j * W(s,X^k+1_j)
 		//   end for 
 		//   for(j=1 to M) do {Normalize the weights}
@@ -114,19 +126,19 @@ public class Localizer extends Thread {
 		int j = 1;
 		// while( i <= N) do
 		while( i <= particleList.size()) {
-		//  if T[i] < Q[j] then
+			//  if T[i] < Q[j] then
 			if (t[i] < q[j]) { 
 				// Index[i] = j;
 				index[i] = j;
 				// i++
 				i++;
 			} else {
-		//  else
+				//  else
 				// j++;
 				j++;
 			}
-		//  end if
-		// end while
+			//  end if
+			// end while
 		}
 		// Return(Index)
 		return index;
@@ -161,25 +173,25 @@ public class Localizer extends Thread {
 	public synchronized boolean isLocalized() {
 		return localized;
 	}
-	
+
 	public double[] getWeights() {
-	    double[] weights = new double[particleList.size()];
-	    for(int i = 0; i < weights.length; i++) {
-	        weights[i] = particleList.get(i).getWeight();
-	    }
-	    return weights;
+		double[] weights = new double[particleList.size()];
+		for(int i = 0; i < weights.length; i++) {
+			weights[i] = particleList.get(i).getWeight();
+		}
+		return weights;
 	}
-	
+
 	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
-	    double[] ranges) {
-	    
-	    this.dx = dx;
-	    this.dy = dy;
-	    this.dYaw = dYaw;
-	    this.ranges = ranges;
-	    
-	    updateReady = true;
-	    notifyAll();
+			double[] ranges) {
+
+		this.dx = dx;
+		this.dy = dy;
+		this.dYaw = dYaw;
+		this.ranges = ranges;
+
+		updateReady = true;
+		notifyAll();
 	}
 	
 	public void drawMap() {
@@ -188,7 +200,7 @@ public class Localizer extends Thread {
 	    }
 	}
 
-	
+
 	/**
 	 * What this thread does when it runs, yo
 	 */
@@ -204,13 +216,12 @@ public class Localizer extends Thread {
 	        updateReady = false;
 	        /* I think this is the right order...
 	        @TODO Make sure this is right, then do it, son.
-	        
 	        predict
 	        update
 	        if (effectiveSampleSize() < threshold) resample;
-	        
-	        */
-	    }
+
+			 */
+		}
 	}
-	
+
 }
