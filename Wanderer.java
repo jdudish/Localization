@@ -6,6 +6,10 @@
  * @author Karl Berger
  */
 
+import javaclient3.*;
+import javaclient3.structures.PlayerConstants;
+import javaclient3.structures.ranger.*;
+
 public class Wanderer extends Thread {
 
 	private PlayerClient pc;
@@ -13,7 +17,7 @@ public class Wanderer extends Thread {
 	private RangerInterface ranger;
 	private Localizer loc;
 
-	public Wanderer( PlayerClient pc, Postition2DInterface pos, RangerInterface ranger, Localizer loc ) {
+	public Wanderer( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, Localizer loc ) {
 		this.pc = pc;
 		this.pos = pos;
 		this.ranger = ranger;
