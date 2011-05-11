@@ -11,13 +11,31 @@ import java.util.Arrays;
  */
 
 public class Localizer extends Thread {
+    public static final int NUM_PARTICLES = 10000;
+
 	private boolean localized;
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
 	
-	public Localizer() {
+	
+	/**
+	 * Create a new Localizer object to be used in a map with the given
+	 * dimensions.
+	 *
+	 * @param   mapw    the width of the map in pixels
+	 * @param   maph    the height of the map in pixels
+	 */
+	public Localizer(int mapw, int maph) {
 		localized = false;
-		particleList = new ArrayList<Particle>();
+		int numParticles = (NUM_PARTICLES > mapw*maph) ? 
+		    mapw*maph : NUM_PARTICLES;
+		particleList = new ArrayList<Particle>(numParticles);
+		int x = 0, y = 0;
+		for (Particle e : particleList) {
+		    e = new Particle(x, y, 0, 1/numParticles);
+		    x = (x+1) % mapw;
+		    if (x == 0) y++;
+		}
 		expectedLocation = null;
 	}
 	
@@ -50,7 +68,7 @@ public class Localizer extends Thread {
 		// {ESS is the Effective Sample Size}
 	}
 	public void update() {
-
+        
 	}
 	public double effectiveSampleSize(double[] weight) {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
@@ -131,7 +149,9 @@ public class Localizer extends Thread {
 	 */
 	@Override
 	public void run() {
-	
+	    /*
+	    
+	    */
 	}
 	
 }

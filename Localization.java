@@ -79,8 +79,9 @@ import javaclient3.structures.ranger.*;
         for (int x = 0; x < wsMap.length; x++) {
             for (int y = 0; y < wsMap[0].length; y++) {
                 if (map[x][y] == 0) {
-                    for (int i = 0; i < 5; i++) {
-                        for (int j = 0; j < 5; j++) {
+                    for (int i = -5; i < 5; i++) {
+                        for (int j = -5; j < 5; j++) {
+                            if (x+i < 0 || y+j < 0) continue;
                             if (map[x+i][y+j] != 0)
                                 wsMap[x+i][y+j] = 0;
                         }
@@ -98,10 +99,24 @@ import javaclient3.structures.ranger.*;
     public static void main(String[] args) {
         int[][] map = getMap(args[0]);
         int[][] wsMap = getWorkspaceMap(map);
-        System.out.println(Arrays.deepToString(map));
-        System.out.println(Arrays.deeptoString(wsMap));
+//        System.out.println("map = " + Arrays.deepToString(map));
+//        System.out.println();
+        System.out.println("wsMap = " + Arrays.deepToString(wsMap));
+        
+        // Testing junk...
+        // @TODO Remove this at some point
+        int mapObs = 0, wsMapObs = 0;
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                if (map[i][j] == 0) mapObs++;
+                if (wsMap[i][j] == 0) wsMapObs++;
+            }
+        }
+        System.out.printf("Original Obstacle Pixels: %d\n" +
+            "Workspace Obstacle Pixels: %d\n", mapObs, wsMapObs);
         
         // copypasta initalization stuff from other jawns
+        /*
         PlayerClient pc;
         if (args.length == 1)
             pc = new PlayerClient("localhost",6665);
@@ -113,6 +128,7 @@ import javaclient3.structures.ranger.*;
     
         RangerInterface ranger = 
             pc.requestInterfaceRanger(0,PlayerConstants.PLAYER_OPEN_MODE);
+        */
         
         /* So as not to potentially overload the ranger interface, we should
          * probably pass the localizer to the wanderer and have the wanderer
