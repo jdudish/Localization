@@ -20,7 +20,9 @@ public class Localizer extends Thread {
 	
 	/**
 	 * Create a new Localizer object to be used in a map with the given
-	 * dimensions.
+	 * dimensions. Fills the list of particles with NUM_PARTICLES particles or
+	 * mapw*maph particles, whichever is smaller. All particles are initalized
+	 * with equal weight, 1 divided by the number of particles.
 	 *
 	 * @param   mapw    the width of the map in pixels
 	 * @param   maph    the height of the map in pixels
@@ -29,14 +31,18 @@ public class Localizer extends Thread {
 		localized = false;
 		int numParticles = (NUM_PARTICLES > mapw*maph) ? 
 		    mapw*maph : NUM_PARTICLES;
+		int ppp = Math.round(mapw*maph/numParticles);   // pixels per particle
 		particleList = new ArrayList<Particle>(numParticles);
 		int x = 0, y = 0;
-		for (Particle e : particleList) {
-		    e = new Particle(x, y, 0, 1.0/numParticles);
-		    x = (x+1) % mapw;
-		    if (x == 0) y++;
+		double weight = 1.0/numParticles;
+		
+		for (int i = 0; i < numParticles; i++) {
+		    particleList.add(i, new Particle(x, y, 0, weight));
+		    x = (x+ppp) % mapw;
+		    if (x < ppp) y ++;
 		}
 		expectedLocation = null;
+
 	}
 	
 	public void predict(double[] scan) {
@@ -143,9 +149,18 @@ public class Localizer extends Thread {
 		}
 		return sum;
 	}
-	public boolean isLocalized() {
+	public synchronized boolean isLocalized() {
 		return localized;
 	}
+	
+	public double[] getWeights() {
+	    double[] weights = new double[particleList.size()];
+	    for(int i = 0; i < weights.length; i++) {
+	        weights[i] = particleList.get(i).getWeight();
+	    }
+	    return weights;
+	}
+	
 	/**
 	 * What this thread does when it runs, yo
 	 */

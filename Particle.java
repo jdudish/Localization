@@ -57,4 +57,15 @@ public class Particle {
 		pose = h;
 	}
 	
+	public double getWeight() {
+	    return this.weight;
+	}
+	
+	@Override
+	public String toString() {
+	    String s = "Particle @ (" + xCoord + ", " + yCoord + ", " + pose + ")";
+	    s += " weight= " + String.valueOf(weight);
+	    return s;
+	}
+	
 }

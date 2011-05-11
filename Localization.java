@@ -147,7 +147,7 @@ import javaclient3.structures.ranger.*;
          * Or we would just let them independently abuse the ranger and pos.
          * Whatever.
          */
-        // Localizer loc = new Localizer();
+        Localizer loc = new Localizer(map.length,map[0].length);
         // Wanderer w = new Wanderer(pc,pos,ranger,loc);
         
         // loc.start();
