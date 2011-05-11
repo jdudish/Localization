@@ -59,7 +59,7 @@ public class Localizer extends Thread {
 
 	public void predict() {
 		// Do we have enough particles?
-		if (effectiveSampleSize() < particleTolerance * particleList.size()) {
+		if (effectiveSampleSize() < particleTolerance * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
