@@ -148,53 +148,10 @@ import javaclient3.structures.ranger.*;
          * Whatever.
          */
         Localizer loc = new Localizer(map.length,map[0].length);
-        // Wanderer w = new Wanderer(pc,pos,ranger,loc);
+        //Wanderer w = new Wanderer(pc,pos,ranger,loc);
         
         // loc.start();
         // w.start();
         
-        // ! All the following commented stuff should be in the wander Thread !
-        
-//         while (true) {
-//     
-//             double turnrate = 0, fwd = 0;
-//             double omega = 20*Math.PI/180; 
-//     
-//             pc.readAll();
-//     
-//             if (!ranger.isDataReady())
-//             continue;
-//     
-//             double[] ranges = ranger.getData().getRanges();
-//     
-//             // yay cut and paste from C++!
-//             // rightmost is sensor 0, 30 degrees behind us.
-//             // directly right is 30/(360/1024) = 85
-//             // directly left is 210/(360/1024) = 597
-//             // do simple collision avoidance
-//             double rightval = (ranges[85]+ranges[90])/2.0;
-//             double leftval = (ranges[592]+ranges[597])/2.0;
-//             double frontval = (ranges[340]+ranges[345])/2.0;
-//             
-//             System.out.printf("(%7f,%7f,%7f) left: %7f fwd: %7f right: %7f\n",
-//                       pos.getX(),pos.getY(),pos.getYaw(),
-//                       leftval,frontval,rightval);
-//             
-//             if (frontval < 0.5) {
-//             fwd = 0;
-//             if (leftval < rightval)
-//                 turnrate = -1*omega;
-//             else
-//                 turnrate = omega;
-//             } else {
-//             fwd = 0.25;
-//             if (leftval < 1.0)
-//                 turnrate = -1*omega;
-//             else if (rightval < 1.0)
-//                 turnrate = omega;
-//             }
-//             
-//             pos.setSpeed(fwd,turnrate);
-//         }
     }
 }
