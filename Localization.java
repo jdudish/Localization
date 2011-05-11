@@ -32,6 +32,16 @@ import javaclient3.structures.ranger.*;
      * Scale of the input map in meters/pixel (pulled from the .world file for the project)
      */
     public final static double MAP_METERS_PER_PIXEL = 0.02;
+
+    /**
+     * Constant for potential field calculation.
+     */
+    public final static double OBSTACLE_POTENTIAL_CONSTANT = 1.0;
+
+    /**
+     * Constant for potential field calculation.
+     */
+    public final static double GOAL_POTENTIAL_CONSTANT = 1.0;
     
     /**
      * Loads in the map from an external file. Does some number fudging,
