@@ -111,7 +111,7 @@ import javaclient3.structures.ranger.*;
         int[][] csMap = getWorkspaceMap(map);
 //        System.out.println("map = " + Arrays.deepToString(map));
 //        System.out.println();
-        System.out.println("csMap = " + Arrays.deepToString(csMap));
+       // System.out.println("csMap = " + Arrays.deepToString(csMap));
         
         // Testing junk...
         // @TODO Remove this at some point
