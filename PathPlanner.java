@@ -27,7 +27,7 @@ import java.util.HashMap;
 
 	public ArrayList<Point> planPath() {
 		PriorityQueue<AStarData<Point>> pq = new PriorityQueue<AStarData<Point>>();
-		pq.add( new AStarData<Point>( heuristic( start ), start ) );
+		pq.add( new AStarData<Point>( 0, start ) );
 		costLookup.put( start, 0.0 );
 		while( !pq.isEmpty() ) {
 			Point curr = pq.poll().getData();
@@ -39,6 +39,7 @@ import java.util.HashMap;
 				if( !visited( succ ) ) {
 					dictionary.put( succ, curr );
 					costLookup.put( succ, costLookup.get(curr) + 1 );
+					System.out.println( "PathCost: " + costLookup.get( succ ) );
 					pq.add( new AStarData<Point>( heuristic( succ ) + costLookup.get( succ ), succ ) );
 				}
 			}
@@ -51,21 +52,22 @@ import java.util.HashMap;
 	}
 
 	private int heuristic( Point state ) {
-		return (int)(Math.abs( goal.getX() - state.getX() ) + Math.abs( goal.getY() - state.getY() ));
+		//return (int)(Math.abs( goal.getX() - state.getX() ) + Math.abs( goal.getY() - state.getY() ));
+		return (int)(Math.sqrt( Math.pow( goal.getX() - state.getX(), 2 ) + Math.pow( goal.getY() - state.getY(), 2 ) ));
 	}
 
 	private ArrayList<Point> getSuccessors( Point current ) {
 		ArrayList<Point> successors = new ArrayList<Point>();
-		if( current.getX() + 1 < map.length && map[(int)current.getX() + 1][(int)current.getY()] != 0 ) {
+		if( map[(int)current.getX() + 1][(int)current.getY()] != 0 ) {
 			successors.add( new Point( (int)current.getX() + 1, (int)current.getY() ) );
 		}
-		if( current.getX() - 1 >= 0 && map[(int)current.getX() - 1][(int)current.getY()] != 0 ) {
+		if( map[(int)current.getX() - 1][(int)current.getY()] != 0 ) {
 			successors.add( new Point( (int)current.getX() - 1, (int)current.getY() ) );
 		}
-		if( current.getY() + 1 < map[(int)current.getX()].length && map[(int)current.getX()][(int)current.getY() + 1] != 0 ) {
+		if( map[(int)current.getX()][(int)current.getY() + 1] != 0 ) {
 			successors.add( new Point( (int)current.getX(), (int)current.getY() + 1 ) );
 		}
-		if( current.getY() - 1 >= 0 && map[(int)current.getX()][(int)current.getY() - 1] != 0 ) {
+		if( map[(int)current.getX()][(int)current.getY() - 1] != 0 ) {
 			successors.add( new Point( (int)current.getX(), (int)current.getY() - 1 ) );
 		}
 		return successors;
@@ -91,5 +93,37 @@ import java.util.HashMap;
 			properPath.add( path.get(i) );
 		}
 		return properPath;
+	}
+	
+	public static void main( String[] args ) {
+		int[][] map = Localization.getMap( args[0] );
+		int[][] cMap = Localization.getWorkspaceMap( map );
+		Point testStart = new Point( 43, 102 );
+		Point testGoal = new Point( 622, 136 );
+		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
+		GridMap showCMap = new GridMap( cMap.length, cMap[0].length, 1.0 );
+		for( int i = 0; i < map.length; i++ ) {
+			for( int j = 0; j < map[0].length; j++ ) {
+				showMap.setVal( i, j, map[i][j] );
+			}
+		}
+		PathPlanner planner = new PathPlanner( 43, 102, 622, 136, cMap );
+		ArrayList<Point> wps = planner.planPath();
+		for( Point wp: wps ) {
+			showMap.setParticle( (int)wp.getX(), (int)wp.getY() );
+		}
+		showMap.pack();
+		showMap.setVisible(true);
+
+		for( int i = 0; i < map.length; i++ ) {
+			for( int j = 0; j < map[0].length; j++ ) {
+				showCMap.setVal( i, j, cMap[i][j] );
+			}
+		}
+		for( Point wp: wps ) {
+			showCMap.setParticle( (int)wp.getX(), (int)wp.getY() );
+		}
+		showCMap.pack();
+		showCMap.setVisible(true);
 	}
  }
