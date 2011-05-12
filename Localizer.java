@@ -11,6 +11,8 @@ import java.util.Arrays;
  */
 public class Localizer extends Thread {
 	public static final int NUM_PARTICLES = 10000;
+	public static final double PARTICLE_TOLERANCE = .95;
+	
 
 	private boolean localized;
 	private boolean updateReady;
@@ -22,7 +24,6 @@ public class Localizer extends Thread {
 	private double[] ranges;
 	private ArrayList<Particle> particleList;
 	private Particle expectedLocation;
-	private static double particleTolerance = .95;
 
 	/**
 	 * Create a new Localizer object to be used in a map with the given
@@ -61,7 +62,7 @@ public class Localizer extends Thread {
 
 	public void predict() {
 		// Do we have enough particles?
-		if (effectiveSampleSize() < particleTolerance * NUM_PARTICLES) {
+		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
@@ -117,11 +118,19 @@ public class Localizer extends Thread {
 			p.setWeight(weight);
 		}
 	}
+	
+	/**
+	 * Returns the effective sample size used for weeding out bad particles.
+	 */
 	public double effectiveSampleSize() {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
 		double ess = particleList.size() / (1 + coeffVariance());
 		return ess;
 	}
+	
+	/**
+     * @TODO Kozak write what this does because I have no clue lolol --Jim
+     */
 	public double coeffVariance() {
 		double c = 0;
 		for (int i = 0; i < particleList.size(); i++) {
@@ -130,6 +139,13 @@ public class Localizer extends Thread {
 		c = c * (1.0/particleList.size());
 		return c;
 	}
+	
+	/**
+	 * Called when the number of particles, according to the effective sample
+	 * size, drops below the threshold PARTICLE_TOLERANCE percentage.
+	 *
+	 * @return  integer array containing @TODO what does this return?
+	 */
 	public int[] resample() {
 		int[] index = new int[particleList.size()];
 		// require sumofi=1 to N (Wi) = 1
@@ -165,6 +181,14 @@ public class Localizer extends Thread {
 		return index;
 	}
 
+    /**
+     * Calculates the probability of a particular particle represents the 
+     * actual position and pose of the robot based on sensor dataz
+     *
+     * @param   p       Particle in question
+     * @param   ranges  sensor dataz
+     * @return  probability (weight) of the given particle
+     */
 	private double prob(Particle p, double[] ranges) {
 		double varX = getVariance(0);
 		double varY = getVariance(1);
@@ -180,6 +204,10 @@ public class Localizer extends Thread {
 		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanYaw,2))/(2*varYaw);		
 		return prob;
 	}
+	
+	/**
+	 * Returns an array of random numbers 0.0 <= x < 1.0 of given size
+	 */
 	public double[] randArray(int size) {
 		double[] array = new double[size];
 		for (int i = 0; i < size;i ++) {
@@ -187,6 +215,7 @@ public class Localizer extends Thread {
 		}
 		return array;
 	}
+	
 	/*
 	 * Calculate running totals :
 	 * array[j] = sumof[l=0,j](list[l])
@@ -200,6 +229,11 @@ public class Localizer extends Thread {
 		}
 		return array;
 	}
+	
+	/**
+	 * Sums up the weights of the all the existing particles and returns it
+	 * as a double
+	 */
 	public double sumOf(ArrayList<Particle> list) {
 		double sum = 0;
 		for (int i = 0; i < list.size();i++) {
@@ -207,10 +241,17 @@ public class Localizer extends Thread {
 		}
 		return sum;
 	}
+	
+	/**
+	 * Check if the robot has localized via the localized flag
+	 */
 	public synchronized boolean isLocalized() {
 		return localized;
 	}
 
+    /**
+     * Get an array containing all the weights of the existing particles
+     */
 	public double[] getWeights() {
 		double[] weights = new double[particleList.size()];
 		for(int i = 0; i < weights.length; i++) {
@@ -222,6 +263,7 @@ public class Localizer extends Thread {
 	private double getStandardDev(int v) {
 		return Math.sqrt(getVariance(v));
 	}
+	
 	/* 
 	 * Calculate variance for x/y/yaw
 	 * @param v - 0 for x, 1 for y, 2 for yaw
@@ -238,6 +280,7 @@ public class Localizer extends Thread {
 		}
 		return variance;
 	}
+	
 	/*
 	 * Calculate mean values for x/y/yaw
 	 * @param int v - 0 for x, 1 for y, 2 for yaw 
@@ -256,7 +299,10 @@ public class Localizer extends Thread {
 		return mean;
 	}
 
-
+    /**
+     * Called by the wanderer to update the localizer with the robot's change
+     * in position and pose, as well as the newest sensor dataz
+     */
 	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
 			double[] ranges) {
 		this.dx = dx;
@@ -269,7 +315,9 @@ public class Localizer extends Thread {
 	}
 
 
-
+    /**
+     * Draws the map all pretty-like for us to look at
+     */
 	public void drawMap() {
 		for (Particle p : particleList) {
 			gmap.setParticle(p.getX(), p.getY());
