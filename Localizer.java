@@ -54,7 +54,7 @@ public class Localizer extends Thread {
 					if (map[(x+j)%mapw][((x+i)/mapw + y)%maph] == 255) {
 						particleList.add(i, 
 								new Particle((x+j)%mapw,(x+i)/mapw + y,0, weight));
-						System.out.println("W: " + weight);
+						//System.out.println("W: " + weight);
 						break;
 					}
 				}
@@ -145,16 +145,22 @@ public class Localizer extends Thread {
 	public double effectiveSampleSize() {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
 		double ess = particleList.size() / (1 + coeffVariance());
+		System.out.println("CV = " + coeffVariance() + " | ESS = " + ess);
 		return ess;
 	}
 
 	/**
-	 * @TODO Kozak write what this does because I have no clue lolol --Jim
+	 * This calculates the coefficient of Variance (cv^2_t) 
+	 *  as according to equation 4 in particle tutorial
 	 */
 	public double coeffVariance() {
 		double c = 0;
-		for (int i = 0; i < particleList.size(); i++) {
-			c += Math.pow((particleList.size() * particleList.get(i).getWeight())-1,2); 
+		for (Particle p : particleList) {
+			System.out.print("weight = " + p.getWeight() + " | ");
+			double x = particleList.size() * p.getWeight();
+			x = x - 1;
+			x = x * x;
+			c += x; 
 		}
 		c = c * (1.0/particleList.size());
 		return c;
@@ -169,11 +175,15 @@ public class Localizer extends Thread {
 	public int[] resample() {
 		int[] index = new int[particleList.size()];
 		// require sumofi=1 to N (Wi) = 1
-		double weightSum = sumOf(particleList);
-		if (1-weightSum < (1/NUM_PARTICLES)) {
-			System.out.println("!! sum = " + weightSum);
-			return null;
-		}
+		/*	AK - Removing this for now, I'm not positive why we have it in the first place
+		 *    (other than the algorithm said so.) And it is consistently botching stuff up.
+		 * double weightSum = sumOf(particleList);
+		 *if (1-weightSum < (1/NUM_PARTICLES)) {
+		 *	System.out.println("!! sum = " + weightSum);
+		 *	return null;
+		 *	}
+		 */
+
 		// Q = sumsum(W); 
 		double[] q = cumsum(particleList);
 		// t = rand(N+1);
@@ -184,7 +194,7 @@ public class Localizer extends Thread {
 		int i = 1;
 		int j = 1;
 		// while( i <= N) do
-		while( i <= particleList.size()) {
+		while( i < particleList.size()) {
 			//  if T[i] < Q[j] then
 			if (t[i] < q[j]) { 
 				// Index[i] = j;
@@ -370,7 +380,7 @@ public class Localizer extends Thread {
 	        predict
 	        update
 	        if (effectiveSampleSize() < threshold) resample;
-	        Nah G, we do EFF in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
+	        Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
 			 */
 			predict();
 			update();
