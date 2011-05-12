@@ -202,7 +202,7 @@ public class Localizer extends Thread {
 		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanY,2))/(2*varY);		
 		prob = prob * (1 / Math.sqrt(2*Math.PI*sdevYaw))
 		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanYaw,2))/(2*varYaw);		
-		return prob;`
+		return prob;
 	}
 	
 	/**

@@ -18,9 +18,9 @@ public class Wanderer extends Thread {
 	private RangerInterface ranger;
 	private Localizer loc;
 	
-	private x;
-	private y;
-	private yaw;
+	private double x;
+	private double y;
+	private double yaw;
 
 	public Wanderer( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, Localizer loc ) {
 		this.pc = pc;
