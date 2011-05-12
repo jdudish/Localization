@@ -51,7 +51,7 @@ public class Localizer extends Thread {
 				particleList.add(i,new Particle(x, y, 0, weight));
 			} else {
 			    for (int j = 1; j < numParticles; j++) {
-			        if (map[(x+j)%mapw][(x+i)/mapw + y] == 255) {
+			        if (map[(x+j)%mapw][((x+i)/mapw + y)%maph] == 255) {
 			            particleList.add(i, 
 			                new Particle((x+j)%mapw,(x+i)/mapw + y,0, weight));
 			            break;
@@ -66,6 +66,9 @@ public class Localizer extends Thread {
 
 		drawMap();
 		gmap.repaint();
+		
+		System.out.printf("NUM_PARTICLES = %d\nParticles in ArrayList = %d\n",
+		    NUM_PARTICLES,particleList.size());
 
 	}
 
