@@ -4,6 +4,7 @@
  * Executes a safe wander for a given PlayerClient robot interface.
  *
  * @author Karl Berger
+ * @author jmd  12 May 2011
  */
 
 import javaclient3.*;
@@ -16,12 +17,19 @@ public class Wanderer extends Thread {
 	private Position2DInterface pos;
 	private RangerInterface ranger;
 	private Localizer loc;
+	
+	private double x;
+	private double y;
+	private double yaw;
 
 	public Wanderer( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, Localizer loc ) {
 		this.pc = pc;
 		this.pos = pos;
 		this.ranger = ranger;
 		this.loc = loc;
+		
+		x = y = yaw = 0;
+		
 	}
 
 	public void run() {
@@ -32,15 +40,19 @@ public class Wanderer extends Thread {
 
             		pc.readAll();
 
-            		if (!ranger.isDataReady()) {
+            		if (!ranger.isDataReady() || !pos.isDataReady()) {
             	    		continue;
             		}
 
-            		if (!pos.isDataReady()) {
-                		continue;
-            		}
-
             		double[] ranges = ranger.getData().getRanges();
+            		
+            		loc.receiveUpdate(x - pos.getX(), y - pos.getY(),
+            		    yaw - pos.getYaw(), ranges);
+            		
+            		x = pos.getX();
+            		y = pos.getY();
+            		yaw = pos.getYaw();
+            		
 
 	            	// do simple collision avoidance
             		double rightval = (ranges[113] + ranges[118]) / 2.0;

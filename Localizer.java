@@ -47,8 +47,17 @@ public class Localizer extends Thread {
 		double weight = 1.0/numParticles;
 
 		for (int i = 0; i < numParticles; i++) {
-			if (map[x][y] != 0)   // Can't be in an obstacle, silly
-				particleList.add(new Particle(x, y, 0, weight));
+			if (map[x][y] != 0) {   // Can't be in an obstacle, silly
+				particleList.add(i,new Particle(x, y, 0, weight));
+			} else {
+			    for (int j = 1; j < numParticles; j++) {
+			        if (map[(x+j)%mapw][((x+i)/mapw + y)%maph] == 255) {
+			            particleList.add(i, 
+			                new Particle((x+j)%mapw,(x+i)/mapw + y,0, weight));
+			            break;
+			        }
+			    }
+			}
 			x = (x+ppp) % mapw;
 			if (x < ppp) y ++;
 		}
@@ -57,10 +66,20 @@ public class Localizer extends Thread {
 
 		drawMap();
 		gmap.repaint();
+		
+		System.out.printf("NUM_PARTICLES = %d\nParticles in ArrayList = %d\n",
+		    NUM_PARTICLES,particleList.size());
 
 	}
 
-	public void predict() {
+	public synchronized void predict() {
+        while (!updateReady) {
+				try {
+					wait();
+				} catch (InterruptedException e) {};
+		}
+		updateReady = false;	
+	    
 		// Do we have enough particles?
 		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
@@ -272,11 +291,11 @@ public class Localizer extends Thread {
 		double variance = 0;
 		for (Particle p : particleList) {
 			if (v==0) 
-				variance += Math.pow(meanX - p.getX(),2);
+				variance += (meanX - p.getX())*(meanX - p.getX());
 			if (v==1)
-				variance += Math.pow(meanY - p.getY(), 2);
+				variance += (meanY - p.getY())*(meanY - p.getY());
 			if (v==2) 
-				variance += Math.pow(meanYaw - p.getPose(),2);
+				variance += (meanYaw - p.getPose())*(meanYaw - p.getPose());
 		}
 		return variance;
 	}
@@ -323,6 +342,18 @@ public class Localizer extends Thread {
 			gmap.setParticle(p.getX(), p.getY());
 		}
 	}
+	
+	/**
+	 * Checks all the particles to see if any of them are inside an obstacle.
+	 * This is impossible, so any that it finds get a weight of zero. This
+	 * ensures that they get wiped out and replaced on the next update.
+	 */
+	private void collisionCheck() {
+	    for (Particle p : particleList) {
+	        if (map[(int)Math.round(p.getX())][(int)Math.round(p.getY())] == 0)
+	            p.setWeight(0.0);
+	    }
+	}
 
 
 	/**
@@ -331,13 +362,6 @@ public class Localizer extends Thread {
 	@Override
 	public void run() {
 		while (!localized) {
-			if (!updateReady) {
-				try {
-					wait();
-				} catch (InterruptedException e) {}
-				continue;
-			}
-			updateReady = false;
 			/* I think this is the right order...
 	        @TODO Make sure this is right, then do it, son.
 	        predict

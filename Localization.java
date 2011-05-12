@@ -132,7 +132,7 @@ import javaclient3.structures.ranger.*;
         
         
         // copypasta initalization stuff from other jawns
-        /*
+        
         PlayerClient pc;
         if (args.length == 1)
             pc = new PlayerClient("localhost",6665);
@@ -144,7 +144,7 @@ import javaclient3.structures.ranger.*;
     
         RangerInterface ranger = 
             pc.requestInterfaceRanger(0,PlayerConstants.PLAYER_OPEN_MODE);
-        */
+        
         
         /* So as not to potentially overload the ranger interface, we should
          * probably pass the localizer to the wanderer and have the wanderer
@@ -154,10 +154,10 @@ import javaclient3.structures.ranger.*;
          * Whatever.
          */
         Localizer loc = new Localizer(map,gmap);
-        //Wanderer w = new Wanderer(pc,pos,ranger,loc);
+        Wanderer w = new Wanderer(pc,pos,ranger,loc);
         
-        // loc.start();
-        // w.start();
+        loc.start();
+        w.start();
         
     }
 }
