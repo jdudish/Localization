@@ -272,11 +272,11 @@ public class Localizer extends Thread {
 		double variance = 0;
 		for (Particle p : particleList) {
 			if (v==0) 
-				variance += Math.pow(meanX - p.getX(),2);
+				variance += (meanX - p.getX())*(meanX - p.getX());
 			if (v==1)
-				variance += Math.pow(meanY - p.getY(), 2);
+				variance += (meanY - p.getY())*(meanY - p.getY());
 			if (v==2) 
-				variance += Math.pow(meanYaw - p.getPose(),2);
+				variance += (meanYaw - p.getPose())*(meanYaw - p.getPose());
 		}
 		return variance;
 	}
