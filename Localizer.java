@@ -60,7 +60,14 @@ public class Localizer extends Thread {
 
 	}
 
-	public void predict() {
+	public synchronized void predict() {
+        while (!updateReady) {
+				try {
+					wait();
+				} catch (InterruptedException e) {};
+		}
+		updateReady = false;	
+	    
 		// Do we have enough particles?
 		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
@@ -331,13 +338,6 @@ public class Localizer extends Thread {
 	@Override
 	public void run() {
 		while (!localized) {
-			if (!updateReady) {
-				try {
-					wait();
-				} catch (InterruptedException e) {}
-				continue;
-			}
-			updateReady = false;
 			/* I think this is the right order...
 	        @TODO Make sure this is right, then do it, son.
 	        predict
