@@ -9,13 +9,14 @@ import java.util.Arrays;
  **
  **
  */
-
 public class Localizer extends Thread {
 	public static final int NUM_PARTICLES = 10000;
 
 	private boolean localized;
 	private boolean updateReady;
 	private double dx,dy,dYaw;
+	// Doubles for means of all particles
+	private double meanX,meanY,meanYaw;
 	private int[][] map;
 	private GridMap gmap;
 	private double[] ranges;
@@ -45,14 +46,14 @@ public class Localizer extends Thread {
 		double weight = 1.0/numParticles;
 
 		for (int i = 0; i < numParticles; i++) {
-		    if (map[x][y] != 0)   // Can't be in an obstacle, silly
-		        particleList.add(new Particle(x, y, 0, weight));
-		    x = (x+ppp) % mapw;
-		    if (x < ppp) y ++;
+			if (map[x][y] != 0)   // Can't be in an obstacle, silly
+				particleList.add(new Particle(x, y, 0, weight));
+			x = (x+ppp) % mapw;
+			if (x < ppp) y ++;
 		}
 		expectedLocation = null;
 		updateReady = false;
-		
+
 		drawMap();
 		gmap.repaint();
 
@@ -70,11 +71,14 @@ public class Localizer extends Thread {
 		//   for (j = 1 to M) do {Prediction after action A}
 		int m = particleList.size();
 		for (int j = 0; j < m; j++) {
-
+			// Drifts, not sure exactly how we should do this, paper suggests using numbers selected randomly
+			//  from a gaussian.
+			double distDrift;
+			double yawDrift;
 			Particle temp = particleList.get(j);
-			
+
 			gmap.clearParticle(temp.getX(),temp.getY());
-			
+
 			double tx = temp.getX() + dx;
 			double ty = temp.getY() + dy;
 			double tp = temp.getPose() + dYaw;
@@ -82,9 +86,9 @@ public class Localizer extends Thread {
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
 			temp.move(tx, ty, tp);
-            
-            gmap.setParticle(temp.getX(),temp.getY());
-            
+
+			gmap.setParticle(temp.getX(),temp.getY());
+
 			//     X^k+1_j = F(X^k_j,A)
 			particleList.set(j, temp);
 			//   end for
@@ -100,10 +104,17 @@ public class Localizer extends Thread {
 		//   for(j=1 to M) do {Normalize the weights}
 		//     W^k+1_j = (W^k+1_j)/(Sumi=1 to M (W^k+1_i))
 		//   end for
-		
+		double thesum = 0;
 		for (Particle p : particleList) {
-		    double weight = p.getWeight() * prob(p,ranges);
-		    p.setWeight(weight);
+			double weight = p.getWeight() * prob(p,ranges);
+			// accrue sum for normalizing
+			thesum += weight;
+			p.setWeight(weight);
+		}
+		// Normalize the weights
+		for (Particle p : particleList) {
+			double weight = p.getWeight() / thesum;
+			p.setWeight(weight);
 		}
 	}
 	public double effectiveSampleSize() {
@@ -153,11 +164,21 @@ public class Localizer extends Thread {
 		// Return(Index)
 		return index;
 	}
-	
+
 	private double prob(Particle p, double[] ranges) {
-	    double prob = 0.0;
-	    
-	    return prob;
+		double varX = getVariance(0);
+		double varY = getVariance(1);
+		double varYaw = getVariance(2);
+		double sdevX = Math.sqrt(varX);
+		double sdevY = Math.sqrt(varY);
+		double sdevYaw = Math.sqrt(varYaw);
+		double prob = (1 / Math.sqrt(2*Math.PI*sdevX))
+			*Math.pow(Math.E,-1*Math.pow(p.getX()-meanX,2))/(2*varX);		
+		prob = prob * (1 / Math.sqrt(2*Math.PI*sdevY))
+		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanY,2))/(2*varY);		
+		prob = prob * (1 / Math.sqrt(2*Math.PI*sdevYaw))
+		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanYaw,2))/(2*varYaw);		
+		return prob;
 	}
 	public double[] randArray(int size) {
 		double[] array = new double[size];
@@ -197,10 +218,47 @@ public class Localizer extends Thread {
 		}
 		return weights;
 	}
+	// we might not need this, not sure yet BROH.
+	private double getStandardDev(int v) {
+		return Math.sqrt(getVariance(v));
+	}
+	/* 
+	 * Calculate variance for x/y/yaw
+	 * @param v - 0 for x, 1 for y, 2 for yaw
+	 */
+	private double getVariance(int v) {
+		double variance = 0;
+		for (Particle p : particleList) {
+			if (v==0) 
+				variance += Math.pow(meanX - p.getX(),2);
+			if (v==1)
+				variance += Math.pow(meanY - p.getY(), 2);
+			if (v==2) 
+				variance += Math.pow(meanYaw - p.getPose(),2);
+		}
+		return variance;
+	}
+	/*
+	 * Calculate mean values for x/y/yaw
+	 * @param int v - 0 for x, 1 for y, 2 for yaw 
+	 */
+	private double getMean(int v) {
+		double mean = 0;
+		for (Particle p : particleList) {
+			if (v == 0)
+				mean += p.getX();
+			if (v == 1) 
+				mean += p.getY();
+			if (v == 2)
+				mean += p.getPose();
+		}
+		mean = mean / particleList.size();
+		return mean;
+	}
+
 
 	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
 			double[] ranges) {
-
 		this.dx = dx;
 		this.dy = dy;
 		this.dYaw = dYaw;
@@ -209,11 +267,13 @@ public class Localizer extends Thread {
 		updateReady = true;
 		notifyAll();
 	}
-	
+
+
+
 	public void drawMap() {
-	    for (Particle p : particleList) {
-	        gmap.setParticle(p.getX(), p.getY());
-	    }
+		for (Particle p : particleList) {
+			gmap.setParticle(p.getX(), p.getY());
+		}
 	}
 
 
@@ -222,22 +282,24 @@ public class Localizer extends Thread {
 	 */
 	@Override
 	public void run() {
-	    while (!localized) {
-	        if (!updateReady) {
-	            try {
-	                wait();
-	            } catch (InterruptedException e) {}
-	            continue;
-	        }
-	        updateReady = false;
-	        /* I think this is the right order...
+		while (!localized) {
+			if (!updateReady) {
+				try {
+					wait();
+				} catch (InterruptedException e) {}
+				continue;
+			}
+			updateReady = false;
+			/* I think this is the right order...
 	        @TODO Make sure this is right, then do it, son.
 	        predict
 	        update
 	        if (effectiveSampleSize() < threshold) resample;
-	        
-
+	        Nah G, we do EFF in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
 			 */
+			predict();
+			update();
+
 		}
 	}
 
