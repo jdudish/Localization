@@ -107,11 +107,16 @@ import javaclient3.structures.ranger.*;
     
     
     public static void main(String[] args) {
+        if (args.length != 1 && args.length != 3) {
+            System.out.println("usage: java Localization <map-file> [<ip> <port>]");
+            return;
+        }
         int[][] map = getMap(args[0]);
         int[][] csMap = getWorkspaceMap(map);
 //        System.out.println("map = " + Arrays.deepToString(map));
 //        System.out.println();
-       // System.out.println("csMap = " + Arrays.deepToString(csMap));
+
+//        System.out.println("csMap = " + Arrays.deepToString(csMap));
         
         // Testing junk...
         // @TODO Remove this at some point

@@ -257,8 +257,8 @@ public class Localizer extends Thread {
 	 * as a double
 	 */
 	public double sumOf(ArrayList<Particle> list) {
-		double sum = 0;
-		for (Particle p : list) { 
+		double sum = 0.0;
+		for (Particle p : list) {
 			sum += p.getWeight();
 		}
 		return sum;
