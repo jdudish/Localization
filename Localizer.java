@@ -52,9 +52,8 @@ public class Localizer extends Thread {
 			} else {
 			    for (int j = 1; j < numParticles; j++) {
 			        if (map[(x+j)%mapw][(x+i)/mapw + y] == 255) {
-			            particleList.add(i, new Particle((x+j)%mapw,
-			                                            (x+i)/mapw + y,
-			                                            0, weight);
+			            particleList.add(i, 
+			                new Particle((x+j)%mapw,(x+i)/mapw + y,0, weight));
 			            break;
 			        }
 			    }
@@ -348,7 +347,7 @@ public class Localizer extends Thread {
 	 */
 	private void collisionCheck() {
 	    for (Particle p : particleList) {
-	        if (map[p.getX()][p.getY()] == 0)
+	        if (map[(int)Math.round(p.getX())][(int)Math.round(p.getY())] == 0)
 	            p.setWeight(0.0);
 	    }
 	}
