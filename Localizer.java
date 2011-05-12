@@ -47,8 +47,18 @@ public class Localizer extends Thread {
 		double weight = 1.0/numParticles;
 
 		for (int i = 0; i < numParticles; i++) {
-			if (map[x][y] != 0)   // Can't be in an obstacle, silly
-				particleList.add(new Particle(x, y, 0, weight));
+			if (map[x][y] != 0) {   // Can't be in an obstacle, silly
+				particleList.add(i,new Particle(x, y, 0, weight));
+			} else {
+			    for (int j = 1; j < numParticles; j++) {
+			        if (map[(x+j)%mapw][(x+i)/mapw + y] == 255) {
+			            particleList.add(i, new Particle((x+j)%mapw,
+			                                            (x+i)/mapw + y,
+			                                            0, weight);
+			            break;
+			        }
+			    }
+			}
 			x = (x+ppp) % mapw;
 			if (x < ppp) y ++;
 		}
@@ -329,6 +339,18 @@ public class Localizer extends Thread {
 		for (Particle p : particleList) {
 			gmap.setParticle(p.getX(), p.getY());
 		}
+	}
+	
+	/**
+	 * Checks all the particles to see if any of them are inside an obstacle.
+	 * This is impossible, so any that it finds get a weight of zero. This
+	 * ensures that they get wiped out and replaced on the next update.
+	 */
+	private void collisionCheck() {
+	    for (Particle p : particleList) {
+	        if (map[p.getX()][p.getY()] == 0)
+	            p.setWeight(0.0);
+	    }
 	}
 
 
