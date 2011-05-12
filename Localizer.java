@@ -145,7 +145,7 @@ public class Localizer extends Thread {
 	public double effectiveSampleSize() {
 		// Effective Sample Size = (M)/(1 + c*(v_t)^2)
 		double ess = particleList.size() / (1 + coeffVariance());
-		System.out.println("CV = " + coeffVariance() + " | ESS = " + ess);
+		//System.out.println("CV = " + coeffVariance() + " | ESS = " + ess);
 		return ess;
 	}
 
@@ -156,7 +156,7 @@ public class Localizer extends Thread {
 	public double coeffVariance() {
 		double c = 0;
 		for (Particle p : particleList) {
-			System.out.print("weight = " + p.getWeight() + " | ");
+			//System.out.print("weight = " + p.getWeight() + " | ");
 			double x = particleList.size() * p.getWeight();
 			x = x - 1;
 			x = x * x;
@@ -337,16 +337,36 @@ public class Localizer extends Thread {
 	 */
 	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
 			double[] ranges) {
-		this.dx = dx;
-		this.dy = dy;
-		this.dYaw = dYaw;
-		this.ranges = ranges;
+		//System.out.println("Update Received");
+		// AK - Going to try compounding updates. We are running super slow,
+		//      and particles hardly move.
+		if (updateReady) {
+			this.dx = dx;
+			this.dy = dy;
+			this.dYaw = dYaw;
+			this.ranges = ranges;
 
-		updateReady = true;
+			//updateReady = true;
+		} else {
+			this.dx += dx;
+			this.dy += dy;
+			this.dYaw += dYaw;
+			this.ranges = ranges;
+			updateReady = true;
+		}
 		notifyAll();
 	}
-
-
+	/**
+	 * So our stuff is already processing significantly slower... We might need this
+	 * 
+	 */
+	private synchronized void clearUpdates() {
+		dx = 0;
+		dy = 0;
+		dYaw = 0;
+		ranges = null;
+		updateReady = false;
+	}
 	/**
 	 * Draws the map all pretty-like for us to look at
 	 */
@@ -355,7 +375,20 @@ public class Localizer extends Thread {
 			gmap.setParticle(p.getX(), p.getY());
 		}
 	}
-
+	/**
+	 * Kill off bad points
+	 * 
+	 * 
+	 */
+	private void killBaddies() {
+		for (Particle p : particleList) {
+			if (p.getWeight() < (1/NUM_PARTICLES)) {
+				gmap.clearParticle(p.getX(),p.getY());
+				particleList.remove(p);
+			}
+		}
+		particleList.trimToSize();
+	}
 	/**
 	 * Checks all the particles to see if any of them are inside an obstacle.
 	 * This is impossible, so any that it finds get a weight of zero. This
@@ -363,8 +396,15 @@ public class Localizer extends Thread {
 	 */
 	private void collisionCheck() {
 		for (Particle p : particleList) {
-			if (map[(int)Math.round(p.getX())][(int)Math.round(p.getY())] == 0)
+			int x = (int) Math.round(p.getX());
+			int y = (int) Math.round(p.getY());
+			// AK BOUNDARY CHECKING BROSKI
+			if ((x < 0 || x >= map.length) || (y < 0 || y >= map[x].length)) {
 				p.setWeight(0.0);
+			} else {
+				if (map[x][y] == 0)
+					p.setWeight(0.0);
+			}
 		}
 	}
 
@@ -374,17 +414,28 @@ public class Localizer extends Thread {
 	 */
 	@Override
 	public void run() {
+		//System.out.println("We've been started!");
 		while (!localized) {
-			/* I think this is the right order...
-	        @TODO Make sure this is right, then do it, son.
-	        predict
-	        update
-	        if (effectiveSampleSize() < threshold) resample;
-	        Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
-			 */
-			predict();
-			update();
-
+			System.out.println("We're running in the loop!");
+			// Yo dawg, shouldn't we like, be waiting on updates?
+			if (updateReady) {
+				// Cool facts: 
+				// We don't get here.
+				System.out.println("Update gotten, PROCESSING");
+				/* I think this is the right order...
+				 *@TODO Make sure this is right, then do it, son.
+				 *predict
+				 *update
+				 *if (effectiveSampleSize() < threshold) resample;
+				 *Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
+				 */
+				predict();
+				update();
+				collisionCheck();
+				killBaddies();
+				clearUpdates();
+				gmap.repaint();
+			}
 		}
 	}
 
