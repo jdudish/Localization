@@ -15,7 +15,6 @@ public class Localizer extends Thread {
 
 
 	private boolean localized;
-	private boolean updateReady;
 	private double dx,dy,dYaw;
 	// Doubles for means of all particles
 	private double meanX,meanY,meanYaw;
@@ -63,7 +62,6 @@ public class Localizer extends Thread {
 			if (x < ppp) y ++;
 		}
 		expectedLocation = null;
-		updateReady = false;
 
 		drawMap();
 		gmap.repaint();
@@ -74,14 +72,8 @@ public class Localizer extends Thread {
 
 	}
 
-	public synchronized void predict() {
-		while (!updateReady) {
-			try {
-				wait();
-			} catch (InterruptedException e) {};
-		}
-		updateReady = false;	
-
+	private void predict() {
+        
 		// Do we have enough particles?
 		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
@@ -388,37 +380,25 @@ public class Localizer extends Thread {
 	 * Called by the wanderer to update the localizer with the robot's change
 	 * in position and pose, as well as the newest sensor dataz
 	 */
-	public synchronized void receiveUpdate(double dx, double dy, double dYaw,
+	public void receiveUpdate(double dx, double dy, double dYaw,
 			double[] ranges) {
 		//System.out.println("Update Received");
 		// AK - Going to try compounding updates. We are running super slow,
 		//      and particles hardly move.
-		if (updateReady) {
 			this.dx = dx;
 			this.dy = dy;
 			this.dYaw = dYaw;
 			this.ranges = ranges;
-
-			//updateReady = true;
-		} else {
-			this.dx += dx;
-			this.dy += dy;
-			this.dYaw += dYaw;
-			this.ranges = ranges;
-			updateReady = true;
-		}
-		notifyAll();
 	}
 	/**
 	 * So our stuff is already processing significantly slower... We might need this
 	 * 
 	 */
-	private synchronized void clearUpdates() {
+	private void clearUpdates() {
 		dx = 0;
 		dy = 0;
 		dYaw = 0;
 		ranges = null;
-		updateReady = false;
 	}
 	/**
 	 * Draws the map all pretty-like for us to look at
@@ -471,24 +451,27 @@ public class Localizer extends Thread {
 		while (!localized) {
 //			System.out.println("We're running in the loop!");
 			// Yo dawg, shouldn't we like, be waiting on updates?
-			if (updateReady) {
-				// Cool facts: 
-				// We don't get here.
-				System.out.println("Update gotten, PROCESSING");
-				/* I think this is the right order...
-				 *@TODO Make sure this is right, then do it, son.
-				 *predict
-				 *update
-				 *if (effectiveSampleSize() < threshold) resample;
-				 *Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
-				 */
-				predict();
-				update();
-				collisionCheck();
-				killBaddies();
-				clearUpdates();
-				gmap.repaint();
+			if (!Wanderer.updateReady()) {
+			    System.out.println("Update not ready, looping pointlessly...");
+			    continue;
 			}
+
+            Wanderer.sendUpdate(this);
+            System.out.println("Update gotten, PROCESSING");
+            /* I think this is the right order...
+             *@TODO Make sure this is right, then do it, son.
+             *predict
+             *update
+             *if (effectiveSampleSize() < threshold) resample;
+             *Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
+             */
+            predict();
+            update();
+            collisionCheck();
+            killBaddies();
+//		    clearUpdates();
+            gmap.repaint();
+			
 		}
 	}
 

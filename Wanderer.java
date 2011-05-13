@@ -21,6 +21,10 @@ public class Wanderer extends Thread {
 	private double x;
 	private double y;
 	private double yaw;
+	
+	public static double dx, dy, dyaw;
+	public static boolean updateReady = false;
+	public static double[] ranges;
 
 	public Wanderer( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, Localizer loc ) {
 		this.pc = pc;
@@ -31,6 +35,31 @@ public class Wanderer extends Thread {
 		x = y = yaw = 0;
 		
 	}
+	
+	public synchronized void updateDataz(double x, double y, double yaw, double[] ranges) {
+	    Wanderer.dx = this.x - x;
+	    Wanderer.dy = this.y - y;
+	    Wanderer.dyaw = this.yaw - yaw;
+	    Wanderer.ranges = ranges;
+	    Wanderer.updateReady = true;
+	    
+	    notifyAll();
+	}
+	
+	public static synchronized boolean updateReady() {
+	    return Wanderer.updateReady;
+	}
+	
+	public static void sendUpdate(Localizer l) {
+	    synchronized (l) {
+            l.receiveUpdate(Wanderer.dx,
+                            Wanderer.dy,
+                            Wanderer.dyaw,
+                            Wanderer.ranges);
+            Wanderer.updateReady = false;
+	    }
+	}
+	
 	public void run() {
 		while( loc.isAlive() && !loc.isLocalized() ) {
 
@@ -45,8 +74,7 @@ public class Wanderer extends Thread {
 
             		double[] ranges = ranger.getData().getRanges();
             		
-            		loc.receiveUpdate(x - pos.getX(), y - pos.getY(),
-            		    yaw - pos.getYaw(), ranges);
+            		updateDataz(pos.getX(),pos.getY(),pos.getYaw(),ranges);
             		
             		x = pos.getX();
             		y = pos.getY();
