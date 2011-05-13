@@ -443,6 +443,7 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
+            System.out.println("X variance = " + getVariance(0));
             predict();
 //          update();
             collisionCheck();

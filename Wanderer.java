@@ -17,11 +17,11 @@ public class Wanderer extends Thread {
 	private Position2DInterface pos;
 	private RangerInterface ranger;
 	private Localizer loc;
-	
+
 	private double x;
 	private double y;
 	private double yaw;
-	
+
 	public static double dx, dy, dyaw;
 	public static boolean updateReady = false;
 	public static double[] ranges;
@@ -31,11 +31,11 @@ public class Wanderer extends Thread {
 		this.pos = pos;
 		this.ranger = ranger;
 		this.loc = loc;
-		
+
 		x = y = yaw = 0;
-		
+
 	}
-	
+
 	public synchronized void updateDataz(double x, double y, double yaw, double[] ranges) {
 	    boolean compound = Wanderer.updateReady;
 	    Wanderer.dx = compound ? Wanderer.dx + this.x - x : this.x - x; 
@@ -46,67 +46,67 @@ public class Wanderer extends Thread {
 	    
 //	    notifyAll();
 	}
-	
+
 	public static synchronized boolean updateReady() {
-	    return Wanderer.updateReady;
+		return Wanderer.updateReady;
 	}
-	
+
 	public static void sendUpdate(Localizer l) {
-	    synchronized (l) {
-            l.receiveUpdate(Wanderer.dx,
-                            Wanderer.dy,
-                            Wanderer.dyaw,
-                            Wanderer.ranges);
-            Wanderer.updateReady = false;
-	    }
+		synchronized (l) {
+			l.receiveUpdate(Wanderer.dx,
+					Wanderer.dy,
+					Wanderer.dyaw,
+					Wanderer.ranges);
+			Wanderer.updateReady = false;
+		}
 	}
-	
+
 	public void run() {
 		while( loc.isAlive() && !loc.isLocalized() ) {
 
-            		double turnrate = 0, fwd = 0;
-            		double omega = 20 * Math.PI / 180;
+			double turnrate = 0, fwd = 0;
+			double omega = 20 * Math.PI / 180;
 
-            		pc.readAll();
+			pc.readAll();
 
-            		if (!ranger.isDataReady() || !pos.isDataReady()) {
-            	    		continue;
-            		}
+			if (!ranger.isDataReady() || !pos.isDataReady()) {
+				continue;
+			}
 
-            		double[] ranges = ranger.getData().getRanges();
-            		
-            		updateDataz(pos.getX(),pos.getY(),pos.getYaw(),ranges);
-            		
-            		x = pos.getX();
-            		y = pos.getY();
-            		yaw = pos.getYaw();
-            		
+			double[] ranges = ranger.getData().getRanges();
 
-	            	// do simple collision avoidance
-            		double rightval = (ranges[113] + ranges[118]) / 2.0;
-            		double leftval = (ranges[569] + ranges[574]) / 2.0;
-            		double frontval = (ranges[340] + ranges[345]) / 2.0;
+			updateDataz(pos.getX(),pos.getY(),pos.getYaw(),ranges);
 
-            		if (frontval < 0.5) {
-                		fwd = 0;
-                		if (Math.abs(leftval - rightval) < .05) {
-                    			turnrate = omega;
-                		} else if (leftval > rightval) {
-                    			turnrate = omega;
-                		} else {
-                    		turnrate = -1 * omega;
-                		}
-            		} else {
-                		fwd = 0.2;
-                		if (leftval < 0.5) {
-                    			fwd = 0.0;
-                    			turnrate = -1 * omega;
-                		} else if (rightval < 0.5) {
-                    			fwd = 0.0;
-                    			turnrate = omega;
-                		}
-            		}
-            		pos.setSpeed(fwd, turnrate);
+			x = pos.getX();
+			y = pos.getY();
+			yaw = pos.getYaw();
+
+
+			// do simple collision avoidance
+			double rightval = (ranges[113] + ranges[118]) / 2.0;
+			double leftval = (ranges[569] + ranges[574]) / 2.0;
+			double frontval = (ranges[340] + ranges[345]) / 2.0;
+
+			if (frontval < 0.5) {
+				fwd = 0;
+				if (Math.abs(leftval - rightval) < .05) {
+					turnrate = omega;
+				} else if (leftval > rightval) {
+					turnrate = omega;
+				} else {
+					turnrate = -1 * omega;
+				}
+			} else {
+				fwd = 0.2;
+				if (leftval < 0.5) {
+					fwd = 0.0;
+					turnrate = -1 * omega;
+				} else if (rightval < 0.5) {
+					fwd = 0.0;
+					turnrate = omega;
+				}
+			}
+			pos.setSpeed(fwd, turnrate);
 		}
 	}// run()
 }// Wanderer.java
