@@ -81,6 +81,9 @@ public class Localizer extends Thread {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
+				double newYaw = Math.random()*2*Math.PI;
+				newYaw -= Math.PI;
+				temp.setPose(newYaw);
 				temp.setWeight(1/NUM_PARTICLES);
 				particleList.add(temp);
 			}
@@ -411,15 +414,15 @@ public class Localizer extends Thread {
 		int j = 0;
 		boolean oob = false;
 		boolean obs = false;
-		for (int i = 0; i < particleList.size();i++) {
-			Particle p = particleList.get(i);
+		while( j < particleList.size()) {
+			Particle p = particleList.get(j);
 			if (p.getWeight() < (1.0/NUM_PARTICLES)) {
 			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
 			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
 				if (!obs)
 				    gmap.clearParticle(p.getX(),p.getY());
 				
-				particleList.remove(i);
+				particleList.remove(j);
 				// HOPE WE DON'T GO INFINITE :3
 				j--;
 			}
@@ -467,7 +470,10 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
-            
+            getMean(0);
+            getMean(1);
+            getMean(2);
+            System.out.println("Particles: " + particleList.size());
             System.out.println("X variance = " + getVariance(0));
             System.out.println("Y variance = " + getVariance(1));
             System.out.println("Yaw var    = " + getVariance(2));
