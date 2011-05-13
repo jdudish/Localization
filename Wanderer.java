@@ -37,13 +37,14 @@ public class Wanderer extends Thread {
 	}
 	
 	public synchronized void updateDataz(double x, double y, double yaw, double[] ranges) {
-	    Wanderer.dx = this.x - x;
-	    Wanderer.dy = this.y - y;
-	    Wanderer.dyaw = this.yaw - yaw;
+	    boolean compound = Wanderer.updateReady;
+	    Wanderer.dx = compound ? Wanderer.dx + this.x - x : this.x - x; 
+	    Wanderer.dy = compound ? Wanderer.dy + this.y - y : this.y - y;
+	    Wanderer.dyaw = compound ? Wanderer.dyaw + this.yaw - yaw : this.yaw - yaw;
 	    Wanderer.ranges = ranges;
 	    Wanderer.updateReady = true;
 	    
-	    notifyAll();
+//	    notifyAll();
 	}
 	
 	public static synchronized boolean updateReady() {

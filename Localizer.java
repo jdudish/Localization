@@ -102,7 +102,7 @@ public class Localizer extends Thread {
 				tp = tp - 2*Math.PI;
 			temp.move(tx, ty, tp);
 
-			gmap.setParticle(temp.getX(),temp.getY());
+//			gmap.setParticle(temp.getX(),temp.getY());
 
 			//     X^k+1_j = F(X^k_j,A)
 			particleList.set(j, temp);
@@ -168,6 +168,7 @@ public class Localizer extends Thread {
 	 * @return  integer array containing @TODO what does this return?
 	 */
 	public int[] resample() {
+	    System.out.println("Resampling...");
 		int[] index = new int[particleList.size()];
 		// require sumofi=1 to N (Wi) = 1
 		/*	AK - Removing this for now, I'm not positive why we have it in the first place
@@ -384,8 +385,9 @@ public class Localizer extends Thread {
 	 */
 	public void drawMap() {
 		for (Particle p : particleList) {
-			gmap.setParticle(p.getX(), p.getY());
+			if (p.getWeight() > 0) gmap.setParticle(p.getX(), p.getY());
 		}
+		gmap.repaint();
 	}
 	/**
 	 * Kill off bad points
@@ -408,8 +410,8 @@ public class Localizer extends Thread {
 	 */
 	private void collisionCheck() {
 		for (Particle p : particleList) {
-			int x = (int) Math.round(p.getX());
-			int y = (int) Math.round(p.getY());
+			int x = (int) p.getX();
+			int y = (int) p.getY();
 			// AK BOUNDARY CHECKING BROSKI
 			if ((x < 0 || x >= map.length) || (y < 0 || y >= map[x].length)) {
 				p.setWeight(0.0);
@@ -427,23 +429,26 @@ public class Localizer extends Thread {
 	@Override
 	public void run() {
 		//System.out.println("We've been started!");
+		int loops = 0;
 		while (!localized) {
 //			System.out.println("We're running in the loop!");
 			// Yo dawg, shouldn't we like, be waiting on updates?
 			if (!Wanderer.updateReady()) {
-			    System.out.println("Update not ready, looping pointlessly...");
+			    loops++;
 			    continue;
 			}
+			
+			System.out.printf("Uselessly looped %d times\n", loops);
+			loops = 0;
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
             predict();
-            update();
+//          update();
             collisionCheck();
             killBaddies();
 //		    clearUpdates();
-            gmap.repaint();
-			
+            drawMap();
 		}
 	}
 
