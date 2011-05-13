@@ -32,7 +32,9 @@ public class Wanderer extends Thread {
 		this.ranger = ranger;
 		this.loc = loc;
 
-		x = y = yaw = 0;
+		x = pos.getX();
+		y = pos.getY();
+		yaw = pos.getYaw();
 
 	}
 

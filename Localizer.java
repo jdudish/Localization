@@ -52,7 +52,7 @@ public class Localizer extends Thread {
 				for (int j = 1; j < numParticles; j++) {
 					if (map[(x+j)%mapw][((x+i)/mapw + y)%maph] == 255) {
 						particleList.add(i, 
-								new Particle((x+j)%mapw,(x+i)/mapw + y,0, weight));
+								new Particle((x+j)%mapw,((x+i)/mapw + y)%maph,0, weight));
 						//System.out.println("W: " + weight);
 						break;
 					}
@@ -64,7 +64,6 @@ public class Localizer extends Thread {
 		expectedLocation = null;
 
 		drawMap();
-		gmap.repaint();
 		double distDrift;
 
 		System.out.printf("NUM_PARTICLES = %d\nParticles in ArrayList = %d\n",
@@ -73,7 +72,7 @@ public class Localizer extends Thread {
 	}
 
 	private void predict() {
-        System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw" + dYaw); 
+        System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw = " + dYaw); 
 		// Do we have enough particles?
 		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
@@ -101,8 +100,7 @@ public class Localizer extends Thread {
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
 			temp.move(tx, ty, tp);
-
-//			gmap.setParticle(temp.getX(),temp.getY());
+			if (map[(int)tx][(int)ty] == 0) temp.setWeight(0.0);
 
 			//     X^k+1_j = F(X^k_j,A)
 			particleList.set(j, temp);
@@ -383,8 +381,11 @@ public class Localizer extends Thread {
 	 * Draws the map all pretty-like for us to look at
 	 */
 	public void drawMap() {
+	    System.out.println("Redrawing map...");
 		for (Particle p : particleList) {
-			if (p.getWeight() > 0) gmap.setParticle(p.getX(), p.getY());
+		    if (map[(int)p.getX()][(int)p.getY()] == 0)
+		        System.out.printf("%80s", "!!! Drawing in an obstacle !!!\n");
+			gmap.setParticle(p.getX(), p.getY());
 		}
 		gmap.repaint();
 	}
@@ -396,7 +397,9 @@ public class Localizer extends Thread {
 	private void killBaddies() {
 		for (Particle p : particleList) {
 			if (p.getWeight() < (1/NUM_PARTICLES)) {
-				gmap.clearParticle(p.getX(),p.getY());
+				if (map[(int)p.getX()][(int)p.getY()] != 0) 
+				    gmap.clearParticle(p.getX(),p.getY());
+				    
 				particleList.remove(p);
 			}
 		}
@@ -442,9 +445,10 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
+            
             System.out.println("X variance = " + getVariance(0));
             predict();
-//          update();
+            update();
             collisionCheck();
             killBaddies();
 //		    clearUpdates();
