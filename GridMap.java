@@ -66,7 +66,7 @@ public class GridMap extends JFrame {
         int imx = (int)(x/scale);
         // flip y to go from right-handed world to left-handed image
         int imy = (int)(y/scale);
-        if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight && theMap.getRGB(imx,imy) != 0)
+        if (imx >= 0 && imx < imwidth && imy >= 0 && imy < imheight && theMap.getRGB(imx,imy) == Color.RED.getRGB())
             theMap.setRGB(imx,imy,Color.WHITE.getRGB());
     }
 

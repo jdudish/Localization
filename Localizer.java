@@ -363,8 +363,7 @@ public class Localizer extends Thread {
 	public void receiveUpdate(double dx, double dy, double dYaw,
 			double[] ranges) {
 		//System.out.println("Update Received");
-		// AK - Going to try compounding updates. We are running super slow,
-		//      and particles hardly move.
+
 			this.dx = dx;
 			this.dy = dy;
 			this.dYaw = dYaw;
