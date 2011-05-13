@@ -222,6 +222,26 @@ public class Localizer extends Thread {
 	 * @return  probability (weight) of the given particle
 	 */
 	private double prob(Particle p, double[] ranges) {
+	    /*  Sensor dataz intergrayshunz
+	    for (int i = 0; i < ranges.length; i += ranges.length/10) {
+	        double angle = Math.PI/512 * i - (2*Math.PI/3);
+	        angle += p.getPose();
+	        
+	        double x = ranges[i]*Math.cos(angle)*(1/MAP_METERS_PER_PIXEL) + p.getX();
+	        double y = ranges[i]*Math.sin(angle)*(1/MAP_METERS_PER_PIXEL) + p.getY();
+	        
+	        x = (int)Math.round(x);
+	        y = (int)Math.round(y);
+	        
+	        if (map[x][y] == 0) {
+	            // Yay! A wall! Increase weight!
+	        } else {
+	            // What? No wall? Decrease weight!
+	        }
+	        
+	    }
+	    */
+	
 		double varX = getVariance(0);
 		double varY = getVariance(1);
 		double varYaw = getVariance(2);
@@ -416,7 +436,7 @@ public class Localizer extends Thread {
 	public void run() {
 		//System.out.println("We've been started!");
 		while (!localized) {
-			System.out.println("We're running in the loop!");
+//			System.out.println("We're running in the loop!");
 			// Yo dawg, shouldn't we like, be waiting on updates?
 			if (updateReady) {
 				// Cool facts: 
