@@ -260,7 +260,7 @@ public class Localizer extends Thread {
                 	// Find relative error to real reading (We can then use this to update probability
                 	double error = (ranges[i] - distance)/ranges[i];
       //          	prob = prob * (1-error);    // Makes all particles go away
-                    prob = prob * 1/Math.exp(error);
+                    prob = prob * 1/Math.exp(error);    // So does this
                 	foundWall = true;
                 }
                 
