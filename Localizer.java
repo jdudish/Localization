@@ -67,6 +67,7 @@ public class Localizer extends Thread {
 
 		drawMap();
 		gmap.repaint();
+		double distDrift;
 
 		System.out.printf("NUM_PARTICLES = %d\nParticles in ArrayList = %d\n",
 				NUM_PARTICLES,particleList.size());
@@ -115,6 +116,7 @@ public class Localizer extends Thread {
 			//   end for
 		}
 	}
+	
 	/*
 	 * This will update and normalize the weights
 	 */
@@ -222,25 +224,56 @@ public class Localizer extends Thread {
 	 * @return  probability (weight) of the given particle
 	 */
 	private double prob(Particle p, double[] ranges) {
-	    /*  Sensor dataz intergrayshunz
+		// dataz intergrayshunz
 	    for (int i = 0; i < ranges.length; i += ranges.length/10) {
 	        double angle = Math.PI/512 * i - (2*Math.PI/3);
 	        angle += p.getPose();
 	        
-	        double x = ranges[i]*Math.cos(angle)*(1/MAP_METERS_PER_PIXEL) + p.getX();
-	        double y = ranges[i]*Math.sin(angle)*(1/MAP_METERS_PER_PIXEL) + p.getY();
+	        // Trace line from roboparticle lasers: detect wall. If line we trace
+	        // is more than 4.5m long, what should we do dawg?
+	       boolean foundWall = false;
+	       double distance = 0;
+	       double j= 0;
+	       while (distance < 4.5) {
+	    	   j++;
+                double pointX = (int) Math.round(j * Math.cos(angle) + p.getX());
+                double pointY = (int) Math.round(j * Math.sin(angle) + p.getY());
+                // get length of this laser
+                distance = Math.sqrt((j*Math.cos(angle)*j*Math.cos(angle)) + (j*Math.sin(angle)*j*Math.sin(angle))); 
+                if (map[(int) pointX][(int) pointY] == 0) {
+                	// We found obstacle!
+                	//Nao, compare to real readings
+                	// Find relative error to real reading (We can then use this to update probability
+                	double error = (ranges[i] - distance)/ranges[i];
+                	double newWeight = p.getWeight() * (1-error);
+                	p.setWeight(newWeight);
+                	foundWall = true;
+                }
+                
+	        }
+	       if (!foundWall) {
+	    	   // If the real laser didn't find a wall either, we safe.
+	    	   if (ranges[i] < 4.5) {
+	    		  double error = ranges[i] / 5;
+	    		  double newWeight = p.getWeight() * (1-error);
+	    		  p.setWeight(newWeight);
+	    	   }
+	       }
+	        // whut is mmpp?
+	        /*double realX = ranges[i]*Math.cos(angle)*(1/MAP_METERS_PER_PIXEL) + p.getX();
+	        double realY = ranges[i]*Math.sin(angle)*(1/MAP_METERS_PER_PIXEL) + p.getY();
 	        
-	        x = (int)Math.round(x);
-	        y = (int)Math.round(y);
+	        realX = (int)Math.round(realX);
+	        realY = (int)Math.round(realY);
 	        
-	        if (map[x][y] == 0) {
+	        if (map[(int) realX][(int) realY] == 0) {
 	            // Yay! A wall! Increase weight!
 	        } else {
 	            // What? No wall? Decrease weight!
 	        }
-	        
+	        */
 	    }
-	    */
+	    
 	
 		double varX = getVariance(0);
 		double varY = getVariance(1);
