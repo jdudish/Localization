@@ -73,7 +73,7 @@ public class Localizer extends Thread {
 	}
 
 	private void predict() {
-        
+        System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw" + dYaw); 
 		// Do we have enough particles?
 		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
@@ -87,8 +87,9 @@ public class Localizer extends Thread {
 		for (int j = 0; j < m; j++) {
 			// Drifts, not sure exactly how we should do this, paper suggests using numbers selected randomly
 			//  from a gaussian.
-			double distDrift;
-			double yawDrift;
+			/*double distDrift;
+			 * double yawDrift;
+			 */
 			Particle temp = particleList.get(j);
 
 			gmap.clearParticle(temp.getX(),temp.getY());
@@ -188,7 +189,7 @@ public class Localizer extends Thread {
 		int i = 1;
 		int j = 1;
 		// while( i <= N) do
-		while( i < particleList.size()) {
+		while( i < particleList.size() && j < particleList.size()) {
 			//  if T[i] < Q[j] then
 			if (t[i] < q[j]) { 
 				// Index[i] = j;
@@ -217,6 +218,7 @@ public class Localizer extends Thread {
 	 */
 	private double prob(Particle p, double[] ranges) {
 		// dataz intergrayshunz
+		double prob = 1;
 	    for (int i = 0; i < ranges.length; i += ranges.length/10) {
 	        double angle = Math.PI/512 * i - (2*Math.PI/3);
 	        angle += p.getPose();
@@ -232,13 +234,17 @@ public class Localizer extends Thread {
                 double pointY = (int) Math.round(j * Math.sin(angle) + p.getY());
                 // get length of this laser
                 distance = Math.sqrt((j*Math.cos(angle)*j*Math.cos(angle)) + (j*Math.sin(angle)*j*Math.sin(angle))); 
+                distance = distance * Localization.MAP_METERS_PER_PIXEL;
+                if ((pointX < 0 || pointX >= map.length) || (pointY < 0 || pointY >= map[0].length)){
+                	distance = 5.0;
+                	continue;
+                }
                 if (map[(int) pointX][(int) pointY] == 0) {
                 	// We found obstacle!
                 	//Nao, compare to real readings
                 	// Find relative error to real reading (We can then use this to update probability
                 	double error = (ranges[i] - distance)/ranges[i];
-                	double newWeight = p.getWeight() * (1-error);
-                	p.setWeight(newWeight);
+                	prob = prob * (1-error);
                 	foundWall = true;
                 }
                 
@@ -247,26 +253,11 @@ public class Localizer extends Thread {
 	    	   // If the real laser didn't find a wall either, we safe.
 	    	   if (ranges[i] < 4.5) {
 	    		  double error = ranges[i] / 5;
-	    		  double newWeight = p.getWeight() * (1-error);
-	    		  p.setWeight(newWeight);
+	    		  prob = prob * (1-error);
 	    	   }
 	       }
-	        // whut is mmpp?
 	    }
 	    
-	
-		double varX = getVariance(0);
-		double varY = getVariance(1);
-		double varYaw = getVariance(2);
-		double sdevX = Math.sqrt(varX);
-		double sdevY = Math.sqrt(varY);
-		double sdevYaw = Math.sqrt(varYaw);
-		double prob = (1 / Math.sqrt(2*Math.PI*sdevX))
-		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanX,2))/(2*varX);		
-		prob = prob * (1 / Math.sqrt(2*Math.PI*sdevY))
-		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanY,2))/(2*varY);		
-		prob = prob * (1 / Math.sqrt(2*Math.PI*sdevYaw))
-		*Math.pow(Math.E,-1*Math.pow(p.getX()-meanYaw,2))/(2*varYaw);		
 		return prob;
 	}
 
@@ -446,13 +437,6 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
-            /* I think this is the right order...
-             *@TODO Make sure this is right, then do it, son.
-             *predict
-             *update
-             *if (effectiveSampleSize() < threshold) resample;
-             *Nah G, we do ESS in predict yoh. Otherwise, lookin good holmes I'm gonna do it. -AK
-             */
             predict();
             update();
             collisionCheck();
