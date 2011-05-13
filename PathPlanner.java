@@ -38,8 +38,6 @@ import java.util.HashMap;
 			for( Point succ : succs ) {
 				if( !visited( succ ) ) {
 					dictionary.put( succ, curr );
-					costLookup.put( succ, costLookup.get(curr) + 1 );
-					System.out.println( "PathCost: " + costLookup.get( succ ) );
 					pq.add( new AStarData<Point>( heuristic( succ ) + costLookup.get( succ ), succ ) );
 				}
 			}
@@ -58,18 +56,73 @@ import java.util.HashMap;
 
 	private ArrayList<Point> getSuccessors( Point current ) {
 		ArrayList<Point> successors = new ArrayList<Point>();
+		Point temp = new Point( 0, 0 );
+		// +X
 		if( map[(int)current.getX() + 1][(int)current.getY()] != 0 ) {
-			successors.add( new Point( (int)current.getX() + 1, (int)current.getY() ) );
+			temp = new Point( (int)current.getX() + 1, (int)current.getY() );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + 1 );
+			}
 		}
+		// -X
 		if( map[(int)current.getX() - 1][(int)current.getY()] != 0 ) {
-			successors.add( new Point( (int)current.getX() - 1, (int)current.getY() ) );
+			temp = new Point( (int)current.getX() - 1, (int)current.getY() );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + 1 );
+			}
 		}
+		// +Y
 		if( map[(int)current.getX()][(int)current.getY() + 1] != 0 ) {
-			successors.add( new Point( (int)current.getX(), (int)current.getY() + 1 ) );
+			temp = new Point( (int)current.getX(), (int)current.getY() + 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + 1 );
+			}
 		}
+		// -Y
 		if( map[(int)current.getX()][(int)current.getY() - 1] != 0 ) {
-			successors.add( new Point( (int)current.getX(), (int)current.getY() - 1 ) );
+			temp = new Point( (int)current.getX(), (int)current.getY() - 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + 1 );
+			}
 		}
+/*
+		// +X +Y
+		if( map[(int)current.getX() + 1][(int)current.getY() + 1] != 0 ) {
+			temp = new Point( (int)current.getX() + 1, (int)current.getY() + 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + Math.sqrt(2) );
+			}
+		}
+		// +X -Y
+		if( map[(int)current.getX() + 1][(int)current.getY() - 1] != 0 ) {
+			temp = new Point( (int)current.getX() + 1, (int)current.getY() - 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + Math.sqrt(2) );
+			}
+		}
+		// -X +Y
+		if( map[(int)current.getX() - 1][(int)current.getY() + 1] != 0 ) {
+			temp = new Point( (int)current.getX() - 1, (int)current.getY() + 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + Math.sqrt(2) );
+			}
+		}
+		// -X -Y
+		if( map[(int)current.getX() - 1][(int)current.getY() - 1] != 0 ) {
+			temp = new Point( (int)current.getX() - 1, (int)current.getY() - 1 );
+			if( !visited( temp ) ) {
+				successors.add( temp );
+				costLookup.put( temp, costLookup.get(current) + Math.sqrt(2) );
+			}
+		}
+*/
 		return successors;
 	}
 
@@ -94,10 +147,28 @@ import java.util.HashMap;
 		}
 		return properPath;
 	}
+
+	public ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLength ) {
+		ArrayList<Point> newPath = new ArrayList<Point>();
+		Point current = path.remove(0);
+		while( path.size() > 1 ) {
+			if( Math.abs( path.get(0).getX() - current.getX() ) < maxLength &&
+			    Math.abs( path.get(0).getY() - current.getY() ) < maxLength ) {
+				path.remove(0);
+			}else {
+				newPath.add( current );
+				current = path.remove(0);
+			}
+		}
+		newPath.add( path.remove(0) );
+		return newPath;
+	}
 	
+	// Main for testing porpoises.
 	public static void main( String[] args ) {
 		int[][] map = Localization.getMap( args[0] );
 		int[][] cMap = Localization.getWorkspaceMap( map );
+		map = Localization.getWorkspaceMap( map );
 		Point testStart = new Point( 43, 102 );
 		Point testGoal = new Point( 622, 136 );
 		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
@@ -109,6 +180,7 @@ import java.util.HashMap;
 		}
 		PathPlanner planner = new PathPlanner( 43, 102, 622, 136, cMap );
 		ArrayList<Point> wps = planner.planPath();
+
 		for( Point wp: wps ) {
 			showMap.setParticle( (int)wp.getX(), (int)wp.getY() );
 		}
@@ -120,6 +192,7 @@ import java.util.HashMap;
 				showCMap.setVal( i, j, cMap[i][j] );
 			}
 		}
+		wps = planner.simplifyPath( wps, 10 );
 		for( Point wp: wps ) {
 			showCMap.setParticle( (int)wp.getX(), (int)wp.getY() );
 		}
