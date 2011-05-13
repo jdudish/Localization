@@ -31,7 +31,6 @@ public class Wanderer extends Thread {
 		x = y = yaw = 0;
 		
 	}
-
 	public void run() {
 		while( loc.isAlive() && !loc.isLocalized() ) {
 
