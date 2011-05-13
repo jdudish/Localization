@@ -103,7 +103,7 @@ public class Localizer extends Thread {
 				tp = tp - 2*Math.PI;
 			temp.move(tx, ty, tp);
 			
-			if (tx < 0 || tx > map.length || ty < 0 || ty > map[0].length) {
+			if (tx < 0 || tx >= map.length || ty < 0 || ty >= map[0].length) {
 			    temp.setWeight(0.0);
 			} else if (map[(int)tx][(int)ty] == 0) {
 			    temp.setWeight(0.0);
