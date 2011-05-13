@@ -79,6 +79,7 @@ public class Localizer extends Thread {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
+				temp.setWeight(1/NUM_PARTICLES);
 				particleList.add(temp);
 			}
 		}
@@ -403,13 +404,18 @@ public class Localizer extends Thread {
 	 * 
 	 */
 	private void killBaddies() {
-		for (Particle p : particleList) {
+		int j = 0;
+		for (int i = 0; i < particleList.size();i++) {
+			Particle p = particleList.get(i);
 			if (p.getWeight() < (1.0/NUM_PARTICLES)) {
 				if (map[(int)p.getX()][(int)p.getY()] != 0) 
 				    gmap.clearParticle(p.getX(),p.getY());
 				
-				particleList.remove(p);
+				particleList.remove(i);
+				// HOPE WE DON'T GO INFINITE :3
+				j--;
 			}
+			j++;
 		}
 		particleList.trimToSize();
 	}
