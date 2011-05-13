@@ -23,7 +23,7 @@ public class LocGoto {
 		double speed = 0;
 		double omega = 20*Math.PI/180;
 		int ptCount = 0;
-		Point currTarget = wps.get( ptCount );
+		Point currTarget = wps.get( ptCount + 1 );
 		boolean reached = false;
 
 
@@ -48,6 +48,7 @@ public class LocGoto {
 				// point counter and see if we have any remaining points to hit
 				ptCount++;
 				// If there are remaining points, update current target
+				System.out.println( "Current wp: " + currTarget );
 				if( ptCount != wps.size() ) {
 					currTarget = wps.get( ptCount );
 					reached = false;
@@ -94,8 +95,8 @@ public class LocGoto {
 				double obsX = Math.cos(obsTheta) * obsDistance;
 				double obsY = Math.sin(obsTheta) * obsDistance;
 				
-				double obsForceX = (-obsX) / Math.pow(obsDistance,3);
-				double obsForceY = (-obsY) / Math.pow(obsDistance,3);
+				double obsForceX = ((-obsX) / Math.pow(obsDistance,3)) * 0.1;
+				double obsForceY = ((-obsY) / Math.pow(obsDistance,3)) * 0.1;
 
 				double goalForceX = (currTarget.getX() - pos.getX()) / 
 					Math.pow(Math.sqrt(Math.pow(currTarget.getX() - 
@@ -112,13 +113,42 @@ public class LocGoto {
 				double robotForce = Math.sqrt( robotFX*robotFX + robotFY*robotFY );
 				double robotForceAngle = Math.atan2(robotFY, robotFX);
 
-				//Now to translate to speed and turnrate for the robot.
-				speed = 0.15;
-				turnrate = (robotForceAngle - pos.getYaw())*robotForce;
+				if( Math.sqrt(Math.pow(currTarget.getX() - 
+					pos.getX(),2) + Math.pow(currTarget.getY() - pos.getY(),2)) < .05 ) {
+					reached = true;
+					speed = 0;
+					turnrate = 0;
+				}else{
+					//Now to translate to speed and turnrate for the robot.
+					speed = 0.1;
+					turnrate = (robotForceAngle - pos.getYaw())*(robotForce * 0.25);
+				}
 			}
 	    		//System.out.printf( "(%7f,%7f,%7f)\n",
 			//      pos.getX(),pos.getY(),pos.getYaw() );
 			pos.setSpeed(speed, turnrate);
 		}
 	}//executePath
+
+	public static void main( String[] args ) {
+		PlayerClient pc;
+        	if (args.length == 1)
+            		pc = new PlayerClient("localhost",6666);
+        	else
+            		pc = new PlayerClient(args[1],Integer.valueOf(args[2]));
+    
+		int[][] map = Localization.getMap( args[0] );
+		int[][] cMap = Localization.getWorkspaceMap( map );
+
+	        Position2DInterface pos = 
+        	    pc.requestInterfacePosition2D(0,PlayerConstants.PLAYER_OPEN_MODE);
+		System.out.println( "HI" );
+		while( !pos.isDataReady() ) {}
+		System.out.println( "HI AGAIN" );
+		System.out.println( pos.getX() + " " + pos.getY() );
+		PathPlanner planner = new PathPlanner( 71, 71, 622, 136, cMap );
+		ArrayList<Point> wps = planner.planPath();
+		wps = planner.simplifyPath( wps, 10 );
+		LocGoto.executePath( pc, wps );
+	}
 } //LocGoto.java
