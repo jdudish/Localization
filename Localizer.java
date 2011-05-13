@@ -252,18 +252,6 @@ public class Localizer extends Thread {
 	    	   }
 	       }
 	        // whut is mmpp?
-	        /*double realX = ranges[i]*Math.cos(angle)*(1/MAP_METERS_PER_PIXEL) + p.getX();
-	        double realY = ranges[i]*Math.sin(angle)*(1/MAP_METERS_PER_PIXEL) + p.getY();
-	        
-	        realX = (int)Math.round(realX);
-	        realY = (int)Math.round(realY);
-	        
-	        if (map[(int) realX][(int) realY] == 0) {
-	            // Yay! A wall! Increase weight!
-	        } else {
-	            // What? No wall? Decrease weight!
-	        }
-	        */
 	    }
 	    
 	
