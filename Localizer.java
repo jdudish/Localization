@@ -74,7 +74,8 @@ public class Localizer extends Thread {
 	private void predict() {
         System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw = " + dYaw); 
 		// Do we have enough particles?
-		if (effectiveSampleSize() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
+        // Changing this for the moment to not be ESS, but list size
+		if (particleList.size() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
@@ -121,6 +122,7 @@ public class Localizer extends Thread {
 		double thesum = 0;
 		for (Particle p : particleList) {
 			double weight = p.getWeight() * prob(p,ranges);
+			//System.out.println("New weight = " + weight);
 			// accrue sum for normalizing
 			thesum += weight;
 			p.setWeight(weight);
@@ -128,6 +130,7 @@ public class Localizer extends Thread {
 		// Normalize the weights
 		for (Particle p : particleList) {
 			double weight = p.getWeight() / thesum;
+		//	System.out.println("Normalized weight = " + weight);
 			p.setWeight(weight);
 		}
 	}
@@ -396,10 +399,10 @@ public class Localizer extends Thread {
 	 */
 	private void killBaddies() {
 		for (Particle p : particleList) {
-			if (p.getWeight() < (1/NUM_PARTICLES)) {
+			if (p.getWeight() < (1.0/NUM_PARTICLES)) {
 				if (map[(int)p.getX()][(int)p.getY()] != 0) 
 				    gmap.clearParticle(p.getX(),p.getY());
-				    
+				
 				particleList.remove(p);
 			}
 		}
@@ -440,13 +443,15 @@ public class Localizer extends Thread {
 			    continue;
 			}
 			
-			System.out.printf("Uselessly looped %d times\n", loops);
+			//System.out.printf("Uselessly looped %d times\n", loops);
 			loops = 0;
 
             Wanderer.sendUpdate(this);
             System.out.println("Update gotten, PROCESSING");
             
             System.out.println("X variance = " + getVariance(0));
+            System.out.println("Y variance = " + getVariance(1));
+            System.out.println("Yaw var    = " + getVariance(2));
             predict();
             update();
             collisionCheck();
