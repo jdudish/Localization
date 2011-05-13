@@ -244,9 +244,9 @@ public class Localizer extends Thread {
 	       double distance = 0;
 	       double j= 0;
 	       while (distance < 4.5) {
-	    	   j++;
-                double pointX = (int) Math.round(j * Math.cos(angle) + p.getX());
-                double pointY = (int) Math.round(j * Math.sin(angle) + p.getY());
+	    	    j++;
+                double pointX = (int) Math.floor(j * Math.cos(angle) + p.getX());
+                double pointY = (int) Math.floor(j * Math.sin(angle) + p.getY());
                 // get length of this laser
                 distance = Math.sqrt((j*Math.cos(angle)*j*Math.cos(angle)) + (j*Math.sin(angle)*j*Math.sin(angle))); 
                 distance = distance * Localization.MAP_METERS_PER_PIXEL;
@@ -259,7 +259,8 @@ public class Localizer extends Thread {
                 	//Nao, compare to real readings
                 	// Find relative error to real reading (We can then use this to update probability
                 	double error = (ranges[i] - distance)/ranges[i];
-                	prob = prob * (1-error);
+      //          	prob = prob * (1-error);    // Makes all particles go away
+                    prob = prob * 1/Math.exp(error);
                 	foundWall = true;
                 }
                 
@@ -416,7 +417,7 @@ public class Localizer extends Thread {
 		boolean obs = false;
 		while( j < particleList.size()) {
 			Particle p = particleList.get(j);
-			if (p.getWeight() < (1.0/NUM_PARTICLES)) {
+			if (p.getWeight() < (1.0/(NUM_PARTICLES*NUM_PARTICLES))) {
 			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
 			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
 				if (!obs)
