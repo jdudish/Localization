@@ -36,7 +36,7 @@ import javaclient3.structures.ranger.*;
     /**
      * Constant for potential field calculation.
      */
-    public final static double OBSTACLE_POTENTIAL_CONSTANT = 1.0;
+    public final static double OBSTACLE_POTENTIAL_CONSTANT = 0.2;
 
     /**
      * Constant for potential field calculation.
