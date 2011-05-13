@@ -72,7 +72,7 @@ public class LocGoto {
 
 				//Now for potential field stuff.
 				//Alter the percieved distance of the obstacle to pretend we are in workspace
-				double obsDistance = ranges[closestLaser] - 0.165;
+				double obsDistance = ranges[closestLaser] - 0.18;
 				double obsTheta = closestLaser * Localization.RADIAN_PER_LASER - 
 					Localization.LASER_ROBOT_OFFSET + pos.getYaw();
 				//X and Y position relative to the robot;
@@ -112,10 +112,11 @@ public class LocGoto {
 				}else{
 					//Now to translate to speed and turnrate for the robot.
 					speed = 0.1;
-					turnrate = (robotForceAngle - pos.getYaw())*(robotForce);
-					turnrate = Math.min( turnrate, 1.0 );
+					turnrate = (robotForceAngle - pos.getYaw())*(robotForce/2);
 				}
 			}
+			if( turnrate > 0 ) turnrate = Math.min( turnrate, 1.0 );
+			if( turnrate < 0 ) turnrate = Math.max( turnrate, -1.0 );
 			pos.setSpeed(speed, turnrate);
 		}
 	}//executePath
@@ -131,7 +132,6 @@ public class LocGoto {
 
 		PathPlanner planner = new PathPlanner( 71, 71, 622, 136, cMap );
 		ArrayList<Point> wps = planner.planPath();
-		wps = planner.simplifyPath( wps, 20 );
 
 		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
 		for( int i = 0; i < map.length; i++ ) {

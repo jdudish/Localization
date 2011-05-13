@@ -32,7 +32,7 @@ import java.util.HashMap;
 		while( !pq.isEmpty() ) {
 			Point curr = pq.poll().getData();
 			if( isGoal( curr ) ) {
-				return buildPath( curr );
+				return simplifyPath(buildPath( curr ), 20);
 			}
 			ArrayList<Point> succs = getSuccessors( curr );
 			for( Point succ : succs ) {
@@ -148,7 +148,7 @@ import java.util.HashMap;
 		return properPath;
 	}
 
-	public ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLength ) {
+	private ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLength ) {
 		ArrayList<Point> newPath = new ArrayList<Point>();
 		Point current = path.remove(0);
 		while( path.size() > 1 ) {
@@ -169,8 +169,6 @@ import java.util.HashMap;
 		int[][] map = Localization.getMap( args[0] );
 		int[][] cMap = Localization.getWorkspaceMap( map );
 		map = Localization.getWorkspaceMap( map );
-		Point testStart = new Point( 43, 102 );
-		Point testGoal = new Point( 622, 136 );
 		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
 		GridMap showCMap = new GridMap( cMap.length, cMap[0].length, 1.0 );
 		for( int i = 0; i < map.length; i++ ) {
@@ -186,17 +184,5 @@ import java.util.HashMap;
 		}
 		showMap.pack();
 		showMap.setVisible(true);
-
-		for( int i = 0; i < map.length; i++ ) {
-			for( int j = 0; j < map[0].length; j++ ) {
-				showCMap.setVal( i, j, cMap[i][j] );
-			}
-		}
-		wps = planner.simplifyPath( wps, 10 );
-		for( Point wp: wps ) {
-			showCMap.setParticle( (int)wp.getX(), (int)wp.getY() );
-		}
-		showCMap.pack();
-		showCMap.setVisible(true);
 	}
  }
