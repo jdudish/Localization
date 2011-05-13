@@ -43,16 +43,18 @@ public class Localizer extends Thread {
 		int ppp = Math.round(mapw*maph/numParticles);   // pixels per particle
 		particleList = new ArrayList<Particle>(numParticles);
 		int x = 0, y = 0;
+		double yaw = 0.0;
 		double weight = 1.0/numParticles;
 
 		for (int i = 0; i < numParticles; i++) {
+		    yaw = Math.random()*2*Math.PI - Math.PI;
 			if (map[x][y] != 0) {   // Can't be in an obstacle, silly
-				particleList.add(i,new Particle(x, y, 0, weight));
+				particleList.add(i,new Particle(x, y, yaw, weight));
 			} else {
 				for (int j = 1; j < numParticles; j++) {
 					if (map[(x+j)%mapw][((x+i)/mapw + y)%maph] == 255) {
 						particleList.add(i, 
-								new Particle((x+j)%mapw,((x+i)/mapw + y)%maph,0, weight));
+								new Particle((x+j)%mapw,((x+i)/mapw + y)%maph,yaw, weight));
 						//System.out.println("W: " + weight);
 						break;
 					}
@@ -101,6 +103,8 @@ public class Localizer extends Thread {
 			// If we are greater than pi, wrap around to negatives.
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
+			if (tp < -1*Math.PI)
+			    tp = tp + 2*Math.PI;
 			temp.move(tx, ty, tp);
 			
 			if (tx < 0 || tx >= map.length || ty < 0 || ty >= map[0].length) {
@@ -405,10 +409,14 @@ public class Localizer extends Thread {
 	 */
 	private void killBaddies() {
 		int j = 0;
+		boolean oob = false;
+		boolean obs = false;
 		for (int i = 0; i < particleList.size();i++) {
 			Particle p = particleList.get(i);
 			if (p.getWeight() < (1.0/NUM_PARTICLES)) {
-				if (map[(int)p.getX()][(int)p.getY()] != 0) 
+			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
+			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
+				if (!obs)
 				    gmap.clearParticle(p.getX(),p.getY());
 				
 				particleList.remove(i);
