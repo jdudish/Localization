@@ -5,7 +5,7 @@
  * A single particle in a particle filter for localization
  */
  
-public class Particle {
+public class Particle implements Comparable<Particle> {
 	private double xCoord;
 	private double yCoord;
 	private double pose;
@@ -62,6 +62,19 @@ public class Particle {
 		Particle returnMe = new Particle(xCoord,yCoord,pose,weight);
 		return returnMe;
 	}
+	
+	public boolean equals(Object o) {
+	    if (! (o instanceof Particle)) return false;
+	    Particle p = (Particle)o;
+	    return this.weight == p.getWeight() && this.xCoord == p.getX() &&
+	        this.yCoord == p.getY() && this.pose == p.getPose();
+	}
+	
+	public int compareTo(Particle p) {
+	    double diff = this.weight - p.getWeight();
+	    return (diff < 0) ? -1 : 1;
+	}
+	
 	@Override
 	public String toString() {
 	    String s = "Particle @ (" + xCoord + ", " + yCoord + ", " + pose + ")";

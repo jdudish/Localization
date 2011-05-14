@@ -107,6 +107,7 @@ public class Localizer extends Thread {
 		}
 		//   for (j = 1 to M) do {Prediction after action A}
 		int m = particleList.size();
+		double dist = this.dist / Localization.MAP_METERS_PER_PIXEL;
 		for (int j = 0; j < m; j++) {
 			// Drifts, not sure exactly how we should do this, paper suggests using numbers selected randomly
 			//  from a gaussian.
@@ -200,7 +201,9 @@ public class Localizer extends Thread {
 	 */
 	public int[] resample() {
 	    System.out.println("Resampling...");
-		int[] index = new int[particleList.size()];
+	    int size = NUM_PARTICLES - particleList.size();
+	    size = size * 2;
+		int[] index = new int[size];
 		// require sumofi=1 to N (Wi) = 1
 		/*	AK - Removing this for now, I'm not positive why we have it in the first place
 		 *    (other than the algorithm said so.) And it is consistently botching stuff up.
@@ -221,22 +224,33 @@ public class Localizer extends Thread {
 		int i = 0;
 		int j = 0;
 		// while( i <= N) do
-		while( i < particleList.size() && j < particleList.size()) {
-			//  if T[i] < Q[j] then
-			if (t[i] < q[j]) { 
-				// Index[i] = j;
-				index[i] = j;
-				// i++
-				i++;
-//				j = 0;
-			} else {
-				//  else
-				// j++;
-				j++;
-			}
-			//  end if
-			// end while
-		}
+// 		while( i < particleList.size() && j < particleList.size()) {
+// 			//  if T[i] < Q[j] then
+// 			if (t[i] < q[j]) { 
+// 				// Index[i] = j;
+// 				index[i] = j;
+// 				// i++
+// 				i++;
+// //				j = 0;
+// 			} else {
+// 				//  else
+// 				// j++;
+// 				j++;
+// 			}
+// 			//  end if
+// 			// end while
+// 		}
+
+        // JD - Instead of doing what the book says, let's just take the
+        // particles with the best weights and clone them.
+        // This doesn't fix our problem. WTF
+        Particle[] sorted = new Particle[particleList.size()];
+        Arrays.sort(particleList.toArray(sorted));
+        while (j < index.length && j < sorted.length) {
+            index[j] = particleList.indexOf(sorted[j]);
+            j++;
+        }
+		
 		// Return(Index)
 		return index;
 	}
