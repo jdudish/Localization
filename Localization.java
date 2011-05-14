@@ -41,7 +41,7 @@ import javaclient3.structures.ranger.*;
     /**
      * Constant for potential field calculation.
      */
-    public final static double GOAL_POTENTIAL_CONSTANT = 2.0;
+    public final static double GOAL_POTENTIAL_CONSTANT = 1.0;
     
     /**
      * Loads in the map from an external file. Does some number fudging,

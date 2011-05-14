@@ -95,7 +95,7 @@ public class LocGoto {
 				//System.out.println( "Distance to wp: " + (currX - (pos.getX() + xOff)) + " " + (currY - (pos.getY() + yOff)) );
 				//System.out.println( "Straight to wp: " + Math.pow( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
 				//		+ Math.pow(currY - (pos.getY() + yOff),2)),3) );
-				//System.out.println( "GoalLoc: " + goalX + " " + goalY );
+				System.out.println( "GoalLoc: " + goalX + " " + goalY );
 				System.out.println( "GoalF: " + goalForceX + " " + goalForceY );
 
 				//Force exerted on the robot
@@ -110,18 +110,18 @@ public class LocGoto {
 				
 				System.out.println( "Force: " + robotForce );
 				System.out.println( "Angle: " + robotForceAngle );
-				//System.out.println( "RAngle: " + pos.getYaw() );
+				System.out.println( "RAngle: " + pos.getYaw() );
 
 				if( Math.sqrt(Math.pow(goalX,2) 
-						+ Math.pow(goalY,2)) < .01 ) {
+						+ Math.pow(goalY,2)) < .05 ) {
 					reached = true;
 					speed = 0;
 					turnrate = 0;
 				}else{
 					//Now to translate to speed and turnrate for the robot.
-					if( Math.abs(pos.getYaw() - robotForceAngle) > 0.05 ) speed = 0.0;
+					if( Math.abs(pos.getYaw() - robotForceAngle) > 0.05 ) speed = 0.01;
 					else speed = 0.1;
-					turnrate = (robotForceAngle - pos.getYaw());//*(robotForce/2);
+					turnrate = (robotForceAngle - pos.getYaw());
 					//if( robotFY > 0 ) turnrate = -turnrate; 
 				}
 			}
@@ -143,7 +143,7 @@ public class LocGoto {
 		PathPlanner planner = new PathPlanner( 71, 71, 622, 136, cMap );
 		ArrayList<Point> wps = planner.planPath();
 
-		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
+		/*GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
 		for( int i = 0; i < map.length; i++ ) {
 			for( int j = 0; j < map[0].length; j++ ) {
 				showMap.setVal( i, j, map[i][j] );
@@ -154,7 +154,7 @@ public class LocGoto {
 			showMap.setParticle( (int)wp.getX(), (int)wp.getY() );
 		}
 		showMap.pack();
-		showMap.setVisible(true);
+		showMap.setVisible(true);*/
 
 		LocGoto.executePath( pc, pos, ranger, wps, 71*0.02, 71*0.02 );
 	}
