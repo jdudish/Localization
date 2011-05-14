@@ -75,7 +75,6 @@ public class Localizer extends Thread {
 				NUM_PARTICLES,particleList.size());
 
 	}
-
 	private void predict() {
         System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw = " + dYaw); 
 		// Do we have enough particles?
@@ -117,8 +116,8 @@ public class Localizer extends Thread {
 
 			gmap.clearParticle(temp.getX(),temp.getY());
 
-			double tx = temp.getX() + dist*Math.cos(pose);
-			double ty = temp.getY() - dist*Math.sin(pose);
+			double tx = temp.getX() + dx/Localization.MAP_METERS_PER_PIXEL;//dist*Math.cos(pose);
+			double ty = temp.getY() - dy/Localization.MAP_METERS_PER_PIXEL;//dist*Math.sin(pose);
 			double tp = pose + dYaw;
 			// If we are greater than pi, wrap around to negatives.
 			if (tp > Math.PI)
@@ -222,7 +221,6 @@ public class Localizer extends Thread {
 		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
 		int i = 0;
-		int j = 0;
 		// while( i <= N) do
 // 		while( i < particleList.size() && j < particleList.size()) {
 // 			//  if T[i] < Q[j] then
@@ -246,9 +244,11 @@ public class Localizer extends Thread {
         // This doesn't fix our problem. WTF
         Particle[] sorted = new Particle[particleList.size()];
         Arrays.sort(particleList.toArray(sorted));
-        while (j < index.length && j < sorted.length) {
+        int j = Math.min(index.length,sorted.length);
+        j -= 1;
+        while (j  >= 0) {
             index[j] = particleList.indexOf(sorted[j]);
-            j++;
+            j--;
         }
 		
 		// Return(Index)
@@ -504,6 +504,12 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("\nUpdate gotten, PROCESSING");
+            predict();
+            update();
+//            collisionCheck();
+            killBaddies();
+//		    clearUpdates();
+            drawMap();
             meanX = getMean(0);
             meanY = getMean(1);
             meanYaw = getMean(2);
@@ -511,12 +517,10 @@ public class Localizer extends Thread {
             System.out.println("X variance = " + getVariance(0));
             System.out.println("Y variance = " + getVariance(1));
             System.out.println("Yaw var    = " + getVariance(2));
-            predict();
-            update();
-//            collisionCheck();
-            killBaddies();
-//		    clearUpdates();
-            drawMap();
+            if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
+            	localized = true;
+            	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
+            }
 		}
 	}
 

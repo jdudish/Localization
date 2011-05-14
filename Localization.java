@@ -92,6 +92,7 @@ import javaclient3.structures.ranger.*;
                     for (int i = -12; i < 12; i++) {
                         for (int j = -12; j < 12; j++) {
                             if (x+i < 0 || y+j < 0) continue;
+                            if (x+i > map.length || y+j > map[0].length) continue;
                             if (map[x+i][y+j] != 0)
                                 csMap[x+i][y+j] = 0;
                         }
