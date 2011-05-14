@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class LocGoto {
 
-	public static void executePath( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, ArrayList<Point> wps, double xOff, double yOff ) {
+	public static void executePath( PlayerClient pc, Position2DInterface pos, RangerInterface ranger, ArrayList<Point> wps, double xOff, double yOff, double thOff ) {
 
 		double turnrate = 0;
 		double speed = 0;
@@ -35,8 +35,8 @@ public class LocGoto {
                 		continue;
             		}
 
-			System.out.printf( "(%7f,%7f,%7f)\n",
-			      pos.getX()+xOff,pos.getY()+yOff,pos.getYaw() );
+			//System.out.printf( "(%7f,%7f,%7f)\n",
+			//      pos.getX()+xOff,pos.getY()+yOff,pos.getYaw() );
 			double[] ranges = ranger.getData().getRanges();
 
 			if( ptCount == wps.size() ) { // If we have reached the last point, then stop
@@ -73,7 +73,7 @@ public class LocGoto {
 				//Alter the percieved distance of the obstacle to pretend we are in workspace
 				double obsDistance = ranges[closestLaser];// - 0.18;
 				double obsTheta = closestLaser * Localization.RADIAN_PER_LASER - 
-					Localization.LASER_ROBOT_OFFSET + pos.getYaw();
+					Localization.LASER_ROBOT_OFFSET + (pos.getYaw() + thOff);
 				//X and Y position relative to the robot;
 				double obsX = Math.cos(obsTheta) * obsDistance;
 				double obsY = Math.sin(obsTheta) * obsDistance;
@@ -81,7 +81,7 @@ public class LocGoto {
 				double obsForceX = ((-obsX) / Math.pow(obsDistance,3));
 				double obsForceY = ((-obsY) / Math.pow(obsDistance,3));
 
-				System.out.println( "ObsF: " + obsForceX + " " + obsForceY );
+				//System.out.println( "ObsF: " + obsForceX + " " + obsForceY );
 
 				double goalX = (currX - (pos.getX() + xOff));
 				double goalY = -(currY - (-pos.getY() + yOff));
@@ -95,22 +95,22 @@ public class LocGoto {
 				//System.out.println( "Distance to wp: " + (currX - (pos.getX() + xOff)) + " " + (currY - (pos.getY() + yOff)) );
 				//System.out.println( "Straight to wp: " + Math.pow( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
 				//		+ Math.pow(currY - (pos.getY() + yOff),2)),3) );
-				System.out.println( "GoalLoc: " + goalX + " " + goalY );
-				System.out.println( "GoalF: " + goalForceX + " " + goalForceY );
+				//System.out.println( "GoalLoc: " + goalX + " " + goalY );
+				//System.out.println( "GoalF: " + goalForceX + " " + goalForceY );
 
 				//Force exerted on the robot
 				double robotFX = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceX + 
 					Localization.GOAL_POTENTIAL_CONSTANT * goalForceX;
 				double robotFY = (Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceY + 
 					Localization.GOAL_POTENTIAL_CONSTANT * goalForceY);
-				System.out.println( "RoboF: " + robotFX + " " + robotFY );
+				//System.out.println( "RoboF: " + robotFX + " " + robotFY );
 
 				double robotForce = Math.sqrt( robotFX*robotFX + robotFY*robotFY );
 				double robotForceAngle = Math.atan2(robotFY, robotFX);
 				
-				System.out.println( "Force: " + robotForce );
-				System.out.println( "Angle: " + robotForceAngle );
-				System.out.println( "RAngle: " + pos.getYaw() );
+				//System.out.println( "Force: " + robotForce );
+				//System.out.println( "Angle: " + robotForceAngle );
+				//System.out.println( "RAngle: " + pos.getYaw() );
 
 				if( Math.sqrt(Math.pow(goalX,2) 
 						+ Math.pow(goalY,2)) < .05 ) {
@@ -121,7 +121,7 @@ public class LocGoto {
 					//Now to translate to speed and turnrate for the robot.
 					if( Math.abs(pos.getYaw() - robotForceAngle) > 0.05 ) speed = 0.01;
 					else speed = 0.1;
-					turnrate = (robotForceAngle - pos.getYaw());
+					turnrate = (robotForceAngle - (pos.getYaw() + thOff));
 					//if( robotFY > 0 ) turnrate = -turnrate; 
 				}
 			}
@@ -143,7 +143,7 @@ public class LocGoto {
 		PathPlanner planner = new PathPlanner( 71, 71, 622, 136, cMap );
 		ArrayList<Point> wps = planner.planPath();
 
-		/*GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
+		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
 		for( int i = 0; i < map.length; i++ ) {
 			for( int j = 0; j < map[0].length; j++ ) {
 				showMap.setVal( i, j, map[i][j] );
@@ -154,8 +154,8 @@ public class LocGoto {
 			showMap.setParticle( (int)wp.getX(), (int)wp.getY() );
 		}
 		showMap.pack();
-		showMap.setVisible(true);*/
+		showMap.setVisible(true);
 
-		LocGoto.executePath( pc, pos, ranger, wps, 71*0.02, 71*0.02 );
+		LocGoto.executePath( pc, pos, ranger, wps, 71*0.02, 71*0.02, 0.0 );
 	}
 } //LocGoto.java

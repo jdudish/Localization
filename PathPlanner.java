@@ -202,7 +202,7 @@ import java.util.HashMap;
 		return path;
 	}
 	
-	// Main for testing porpoises.
+	/*// Main for testing porpoises.
 	public static void main( String[] args ) {
 		int[][] map = Localization.getMap( args[0] );
 		int[][] cMap = Localization.getCspaceMap( map );
@@ -222,5 +222,5 @@ import java.util.HashMap;
 		}
 		showMap.pack();
 		showMap.setVisible(true);
-	}
+	}*/
  }
