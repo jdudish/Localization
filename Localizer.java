@@ -150,6 +150,13 @@ public class Localizer extends Thread {
 		//     W^k+1_j = (W^k+1_j)/(Sumi=1 to M (W^k+1_i))
 		//   end for
 		double thesum = 0;
+		meanX = getMean(0);
+        meanY = getMean(1);
+        meanYaw = getMean(2);
+        //System.out.println("Particles: " + particleList.size());
+       // System.out.println("X variance = " + getStandardDev(0));
+        //System.out.println("Y variance = " + getStandardDev(1));
+       // System.out.println("Yaw var    = " + getStandardDev(2));
 		for (Particle p : particleList) {
 			double weight = p.getWeight() * prob(p,ranges);
 			//System.out.println("New weight = " + weight);
@@ -474,7 +481,9 @@ public class Localizer extends Thread {
 			}
 		}
 	}
-
+	public Particle getPosition() {
+		return expectedLocation;
+	}
 
 	/**
 	 * What this thread does when it runs, yo
@@ -502,15 +511,9 @@ public class Localizer extends Thread {
             killBaddies();
 //		    clearUpdates();
             drawMap();
-            meanX = getMean(0);
-            meanY = getMean(1);
-            meanYaw = getMean(2);
-            System.out.println("Particles: " + particleList.size());
-            System.out.println("X variance = " + getStandardDev(0));
-            System.out.println("Y variance = " + getStandardDev(1));
-            System.out.println("Yaw var    = " + getStandardDev(2));
+            
             if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
-            	//localized = true;
+            	localized = true;
             	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
             }
 		}
