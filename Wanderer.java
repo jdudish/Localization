@@ -7,6 +7,9 @@
  * @author jmd  12 May 2011
  */
 
+import java.awt.Point;
+import java.util.ArrayList;
+
 import javaclient3.*;
 import javaclient3.structures.PlayerConstants;
 import javaclient3.structures.ranger.*;
@@ -109,5 +112,13 @@ public class Wanderer extends Thread {
 			}
 			pos.setSpeed(fwd, turnrate);
 		}
+		Particle p = loc.getPosition();
+		int[][] myMap = Localization.getCspaceMap(loc.getmap());
+		PathPlanner planner = new PathPlanner((int)p.getX(),(int)p.getY(),610,201,myMap);
+		ArrayList<Point> points = planner.planPath();
+		PathPlanner secondPath = new PathPlanner(610,201,514,125,myMap);
+		ArrayList<Point> secondPoints = secondPath.planPath();
+		points.addAll(secondPoints);
+		LocGoto.executePath(pc, pos, ranger, points,p.getX(), p.getY(),p.getPose());
 	}// run()
 }// Wanderer.java

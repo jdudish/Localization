@@ -484,7 +484,9 @@ public class Localizer extends Thread {
 	public Particle getPosition() {
 		return expectedLocation;
 	}
-
+	public int[][] getmap() {
+		return map;
+	}
 	/**
 	 * What this thread does when it runs, yo
 	 */
