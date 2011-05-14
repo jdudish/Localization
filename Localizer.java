@@ -301,7 +301,7 @@ public class Localizer extends Thread {
 	       if (!foundWall) {
 	    	   // If the real laser didn't find a wall either, we safe.
 	    	   if (ranges[i] < 4.5) {
-	    		  double error = ranges[i] / 5;
+		       double error = ranges[i] / 5;
 	    		  prob = prob * (error);
 	    	   }
 	       }
@@ -419,16 +419,6 @@ public class Localizer extends Thread {
 			this.ranges = ranges;
 	}
 	/**
-	 * So our stuff is already processing significantly slower... We might need this
-	 * 
-	 */
-	private void clearUpdates() {
-		dx = 0;
-		dy = 0;
-		dYaw = 0;
-		ranges = null;
-	}
-	/**
 	 * Draws the map all pretty-like for us to look at
 	 */
 	public void drawMap() {
@@ -516,9 +506,9 @@ public class Localizer extends Thread {
             meanY = getMean(1);
             meanYaw = getMean(2);
             System.out.println("Particles: " + particleList.size());
-            System.out.println("X variance = " + getVariance(0));
-            System.out.println("Y variance = " + getVariance(1));
-            System.out.println("Yaw var    = " + getVariance(2));
+            System.out.println("X variance = " + getStandardDev(0));
+            System.out.println("Y variance = " + getStandardDev(1));
+            System.out.println("Yaw var    = " + getStandardDev(2));
             if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
             	//localized = true;
             	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
