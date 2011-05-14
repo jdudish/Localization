@@ -83,7 +83,7 @@ import javaclient3.structures.ranger.*;
      * @param map   the configuration space map as a 2D integer array
      * @return      the workspace map as a 2D integer array
      */
-    public static int[][] getWorkspaceMap(int[][] map) {
+    public static int[][] getCspaceMap(int[][] map) {
         int[][] csMap = new int[map.length][map[0].length];
         
         for (int x = 0; x < csMap.length; x++) {
@@ -113,7 +113,7 @@ import javaclient3.structures.ranger.*;
             return;
         }
         int[][] map = getMap(args[0]);
-        int[][] csMap = getWorkspaceMap(map);
+        int[][] csMap = getCspaceMap(map);
 //        System.out.println("map = " + Arrays.deepToString(map));
 //        System.out.println();
 

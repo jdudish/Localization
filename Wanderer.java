@@ -63,7 +63,7 @@ public class Wanderer extends Thread {
 	}
 
 	public void run() {
-		while( loc.isAlive() && !loc.isLocalized() ) {
+		while(!loc.isLocalized() ) {
 
 			double turnrate = 0, fwd = 0;
 			double omega = 20 * Math.PI / 180;

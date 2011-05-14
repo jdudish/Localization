@@ -138,7 +138,7 @@ public class LocGoto {
 		RangerInterface ranger = pc.requestInterfaceRanger( 0, PlayerConstants.PLAYER_OPEN_MODE );
     
 		int[][] map = Localization.getMap( args[0] );
-		int[][] cMap = Localization.getWorkspaceMap( map );
+		int[][] cMap = Localization.getCspaceMap( map );
 
 		PathPlanner planner = new PathPlanner( 71, 71, 622, 136, cMap );
 		ArrayList<Point> wps = planner.planPath();
