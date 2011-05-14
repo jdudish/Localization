@@ -214,11 +214,11 @@ public class Localizer extends Thread {
 		 */
 
 		// Q = sumsum(W); 
-		double[] q = cumsum(particleList);
-		// t = rand(N+1);
-		double[] t = randArray(particleList.size()+1); // t is an array of N+1 random numbers
-		// T = sort(t);
-		Arrays.sort(t);
+// 		double[] q = cumsum(particleList);
+// 		// t = rand(N+1);
+// 		double[] t = randArray(particleList.size()+1); // t is an array of N+1 random numbers
+// 		// T = sort(t);
+// 		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
 		int i = 0;
 		// while( i <= N) do
@@ -290,7 +290,9 @@ public class Localizer extends Thread {
                 	// We found obstacle!
                 	//Nao, compare to real readings
                 	// Find relative error to real reading (We can then use this to update probability)
-                	double error = .01*(ranges[i] - distance)/ranges[i];
+                	double error = .01*Math.abs(ranges[i] - distance)/ranges[i];
+                	if (ranges[i] >= 4.5)
+                	    error = .1;
                 	prob = prob * (1-error);
                 	foundWall = true;
                 }
@@ -299,8 +301,8 @@ public class Localizer extends Thread {
 	       if (!foundWall) {
 	    	   // If the real laser didn't find a wall either, we safe.
 	    	   if (ranges[i] < 4.5) {
-	    		  double error = ranges[i] / 5;
-	    		  prob = prob * (1-error);
+		       double error = ranges[i] / 5;
+	    		  prob = prob * (error);
 	    	   }
 	       }
 	    }
@@ -364,7 +366,7 @@ public class Localizer extends Thread {
 	}
 	// we might not need this, not sure yet BROH.
 	private double getStandardDev(int v) {
-		return Math.sqrt(getVariance(v));
+		return Math.sqrt(getVariance(v)/particleList.size());
 	}
 
 	/* 
@@ -415,16 +417,6 @@ public class Localizer extends Thread {
 			this.dist = Math.sqrt(dx*dx + dy*dy);
 			this.dYaw = dYaw;
 			this.ranges = ranges;
-	}
-	/**
-	 * So our stuff is already processing significantly slower... We might need this
-	 * 
-	 */
-	private void clearUpdates() {
-		dx = 0;
-		dy = 0;
-		dYaw = 0;
-		ranges = null;
 	}
 	/**
 	 * Draws the map all pretty-like for us to look at
@@ -514,11 +506,11 @@ public class Localizer extends Thread {
             meanY = getMean(1);
             meanYaw = getMean(2);
             System.out.println("Particles: " + particleList.size());
-            System.out.println("X variance = " + getVariance(0));
-            System.out.println("Y variance = " + getVariance(1));
-            System.out.println("Yaw var    = " + getVariance(2));
+            System.out.println("X variance = " + getStandardDev(0));
+            System.out.println("Y variance = " + getStandardDev(1));
+            System.out.println("Yaw var    = " + getStandardDev(2));
             if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
-            	localized = true;
+            	//localized = true;
             	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
             }
 		}

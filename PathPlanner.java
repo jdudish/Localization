@@ -205,8 +205,8 @@ import java.util.HashMap;
 	// Main for testing porpoises.
 	public static void main( String[] args ) {
 		int[][] map = Localization.getMap( args[0] );
-		int[][] cMap = Localization.getWorkspaceMap( map );
-		map = Localization.getWorkspaceMap( map );
+		int[][] cMap = Localization.getCspaceMap( map );
+		map = Localization.getCspaceMap( map );
 		GridMap showMap = new GridMap( map.length, map[0].length, 1.0 );
 		GridMap showCMap = new GridMap( cMap.length, cMap[0].length, 1.0 );
 		for( int i = 0; i < map.length; i++ ) {
