@@ -75,7 +75,6 @@ public class Localizer extends Thread {
 				NUM_PARTICLES,particleList.size());
 
 	}
-
 	private void predict() {
         System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw = " + dYaw); 
 		// Do we have enough particles?
@@ -246,7 +245,8 @@ public class Localizer extends Thread {
         Particle[] sorted = new Particle[particleList.size()];
         Arrays.sort(particleList.toArray(sorted));
         int j = Math.min(index.length,sorted.length);
-        while (j < index.length && j < sorted.length) {
+        j -= 1;
+        while (j  >= 0) {
             index[j] = particleList.indexOf(sorted[j]);
             j--;
         }
@@ -504,6 +504,12 @@ public class Localizer extends Thread {
 
             Wanderer.sendUpdate(this);
             System.out.println("\nUpdate gotten, PROCESSING");
+            predict();
+            update();
+//            collisionCheck();
+            killBaddies();
+//		    clearUpdates();
+            drawMap();
             meanX = getMean(0);
             meanY = getMean(1);
             meanYaw = getMean(2);
@@ -511,12 +517,10 @@ public class Localizer extends Thread {
             System.out.println("X variance = " + getVariance(0));
             System.out.println("Y variance = " + getVariance(1));
             System.out.println("Yaw var    = " + getVariance(2));
-            predict();
-            update();
-//            collisionCheck();
-            killBaddies();
-//		    clearUpdates();
-            drawMap();
+            if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
+            	localized = true;
+            	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
+            }
 		}
 	}
 
