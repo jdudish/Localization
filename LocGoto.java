@@ -77,46 +77,57 @@ public class LocGoto {
 					Localization.LASER_ROBOT_OFFSET + pos.getYaw();
 				//X and Y position relative to the robot;
 				double obsX = Math.cos(obsTheta) * obsDistance;
-				double obsY = Math.sin(obsTheta) * obsDistance;
+				double obsY = -Math.sin(obsTheta) * obsDistance;
 				
 				double obsForceX = ((-obsX) / Math.pow(obsDistance,3));
 				double obsForceY = ((-obsY) / Math.pow(obsDistance,3));
 
-				System.out.println( "ObsF: " + obsForceX + " " + obsForceY );
+				//System.out.println( "ObsF: " + obsForceX + " " + obsForceY );
 
-				double goalForceX = (currX - (pos.getX() + xOff)) / 
-					Math.pow( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
-						+ Math.pow(currY - (pos.getY() + yOff),2)), 3);
-				double goalForceY = (currY - (pos.getY() + yOff)) /
-					Math.pow( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
-						+ Math.pow(currY - (pos.getY() + yOff),2)),3);
+				double goalX = (currX - (pos.getX() + xOff));
+				double goalY = (currY - (pos.getY() + yOff));
+				double goalForceX = goalX / 
+					Math.pow( Math.sqrt(Math.pow(goalX,2) 
+						+ Math.pow(goalY,2)), 3);
+				double goalForceY = goalY /
+					Math.pow( Math.sqrt(Math.pow(goalX,2) 
+						+ Math.pow(goalY,2)), 3);
 
+				//System.out.println( "Distance to wp: " + (currX - (pos.getX() + xOff)) + " " + (currY - (pos.getY() + yOff)) );
+				//System.out.println( "Straight to wp: " + Math.pow( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
+				//		+ Math.pow(currY - (pos.getY() + yOff),2)),3) );
+				System.out.println( "GoalLoc: " + goalX + " " + goalY );
 				System.out.println( "GoalF: " + goalForceX + " " + goalForceY );
 
 				//Force exerted on the robot
 				double robotFX = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceX + 
 					Localization.GOAL_POTENTIAL_CONSTANT * goalForceX;
-				double robotFY = Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceY + 
-					Localization.GOAL_POTENTIAL_CONSTANT * goalForceY;
+				double robotFY = (Localization.OBSTACLE_POTENTIAL_CONSTANT * obsForceY + 
+					Localization.GOAL_POTENTIAL_CONSTANT * goalForceY);
+				//System.out.println( "RoboF: " + robotFX + " " + robotFY );
+
 				double robotForce = Math.sqrt( robotFX*robotFX + robotFY*robotFY );
 				double robotForceAngle = Math.atan2(robotFY, robotFX);
 				
-				System.out.println( "Force: " + robotForce );
-				System.out.println( "Angle: " + robotForceAngle );
+				//System.out.println( "Force: " + robotForce );
+				//System.out.println( "Angle: " + robotForceAngle );
+				//System.out.println( "RAngle: " + pos.getYaw() );
 
-				if( Math.sqrt(Math.pow(currX - (pos.getX() + xOff),2) 
-						+ Math.pow(currY - (pos.getY() + yOff),2)) < .05 ) {
+				if( Math.sqrt(Math.pow(goalX,2) 
+						+ Math.pow(goalY,2)) < .05 ) {
 					reached = true;
 					speed = 0;
 					turnrate = 0;
 				}else{
 					//Now to translate to speed and turnrate for the robot.
-					speed = 0.1;
-					turnrate = (robotForceAngle - pos.getYaw())*(robotForce/2);
+					if( Math.abs(pos.getYaw() - robotForceAngle) > 0.05 ) speed = 0.0;
+					else speed = 0.1;
+					turnrate = (robotForceAngle - pos.getYaw());//*(robotForce/2);
+					//if( robotFY > 0 ) turnrate = -turnrate; 
 				}
 			}
-			if( turnrate > 0 ) turnrate = Math.min( turnrate, 1.0 );
-			if( turnrate < 0 ) turnrate = Math.max( turnrate, -1.0 );
+			if( turnrate > 1.0 ) turnrate = 1.0;
+			if( turnrate < -1.0 ) turnrate = -1.0;
 			pos.setSpeed(speed, turnrate);
 		}
 	}//executePath

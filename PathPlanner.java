@@ -148,12 +148,12 @@ import java.util.HashMap;
 		return properPath;
 	}
 
-	private ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLength ) {
+	private ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLen ) {
 		ArrayList<Point> newPath = new ArrayList<Point>();
 		Point current = path.remove(0);
 		while( path.size() > 1 ) {
-			if( Math.abs( path.get(0).getX() - current.getX() ) < maxLength &&
-			    Math.abs( path.get(0).getY() - current.getY() ) < maxLength ) {
+			if( Math.abs( path.get(0).getX() - current.getX() ) < maxLen &&
+			    Math.abs( path.get(0).getY() - current.getY() ) < maxLen ) {
 				path.remove(0);
 			}else {
 				newPath.add( current );
@@ -162,6 +162,44 @@ import java.util.HashMap;
 		}
 		newPath.add( path.remove(0) );
 		return newPath;
+
+		/*if( path.size() < 3 ) {
+			return path;
+		}
+		int start = 0;
+		int end = 1;
+		while( end < path.size() ) {
+			if( (end - start) == (maxLen + 1) ) {
+				//path.removeRange(start + 1, end - 1);
+				for( int i = start + 1; i < end - 1; i++ ) {
+					path.remove( start + 1 );
+				}
+				start++;
+				end = start + 1;
+			}else {
+				if( path.get(start).getX() == path.get(end).getX() ||
+						path.get(start).getY() == path.get(end).getY() ) {
+					end++;
+				}else {
+					if( end - start == 1) {
+						start++;
+						end++;
+					}else if( end - start == 2 ) {
+						path.remove( start + 1 );
+						start++;
+						end = start + 1;
+					}else {
+						//path.removeRange( start + 1, end - 1 );
+						for( int i = start + 1; i < end - 1; i++ ) {
+							path.remove( start + 1 );
+						}
+						start++;
+						end = start + 1;
+					}
+				}
+			}
+		}
+		return path;*/
 	}
 	
 	// Main for testing porpoises.
