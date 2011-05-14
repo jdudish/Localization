@@ -264,7 +264,7 @@ public class Localizer extends Thread {
 	       while (distance < 4.5) {
 	    	    j++;
                 double pointX = (int) Math.floor(j * Math.cos(angle) + p.getX());
-                double pointY = (int) Math.floor(j * Math.sin(angle) + p.getY());
+                double pointY = (int) Math.floor(-1*j * Math.sin(angle) + p.getY());
                 // get length of this laser
                 distance = Math.sqrt((j*Math.cos(angle)*j*Math.cos(angle)) + (j*Math.sin(angle)*j*Math.sin(angle))); 
                 distance = distance * Localization.MAP_METERS_PER_PIXEL;
