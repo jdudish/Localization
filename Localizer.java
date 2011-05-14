@@ -222,7 +222,6 @@ public class Localizer extends Thread {
 		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
 		int i = 0;
-		int j = 0;
 		// while( i <= N) do
 // 		while( i < particleList.size() && j < particleList.size()) {
 // 			//  if T[i] < Q[j] then
@@ -246,9 +245,10 @@ public class Localizer extends Thread {
         // This doesn't fix our problem. WTF
         Particle[] sorted = new Particle[particleList.size()];
         Arrays.sort(particleList.toArray(sorted));
+        int j = Math.min(index.length,sorted.length);
         while (j < index.length && j < sorted.length) {
             index[j] = particleList.indexOf(sorted[j]);
-            j++;
+            j--;
         }
 		
 		// Return(Index)
