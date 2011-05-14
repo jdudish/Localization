@@ -15,7 +15,7 @@ public class Localizer extends Thread {
 
 
 	private boolean localized;
-	private double dx,dy,dYaw;
+	private double dx,dy,dYaw, dist;
 	// Doubles for means of all particles
 	private double meanX,meanY,meanYaw;
 	private int[][] map;
@@ -64,9 +64,12 @@ public class Localizer extends Thread {
 			if (x < ppp) y ++;
 		}
 		expectedLocation = null;
+		
+		meanX = getMean(0);
+		meanY = getMean(1);
+		meanYaw = getMean(2);
 
 		drawMap();
-		double distDrift;
 
 		System.out.printf("NUM_PARTICLES = %d\nParticles in ArrayList = %d\n",
 				NUM_PARTICLES,particleList.size());
@@ -77,32 +80,46 @@ public class Localizer extends Thread {
         System.out.println("Predictin: dx = " + dx + " | dy = " + dy + " | dyaw = " + dYaw); 
 		// Do we have enough particles?
         // Changing this for the moment to not be ESS, but list size
+        double xDrift, yDrift, dir;
 		if (particleList.size() < PARTICLE_TOLERANCE * NUM_PARTICLES) {
 			int[] indexCopyList = resample();
 			for (int i = 0; i < indexCopyList.length; i++) {
 				Particle temp = (Particle) particleList.get(i).clone();
-				double newYaw = Math.random()*2*Math.PI;
-				newYaw -= Math.PI;
+				dir = Math.random() - .5;
+				xDrift = dir >= 0 ? Math.random()*5.0 : Math.random()*-5.0;
+				dir = Math.random() - .5;
+				yDrift = dir >= 0 ? Math.random()*5.0 : Math.random()*-5.0;
+                
+                temp.setX(temp.getX() + xDrift);
+                temp.setY(temp.getY() + yDrift);
+                
+                if (temp.getX() < 0 || temp.getX() >= map.length ||
+                    temp.getY() < 0 || temp.getY() >= map[0].length) {
+                    
+                    i--;
+                    continue;
+                }
+				double newYaw = Math.random()*2*Math.PI - Math.PI;
 				temp.setPose(newYaw);
-				temp.setWeight(1/NUM_PARTICLES);
+				temp.setWeight(1.0/NUM_PARTICLES);
 				particleList.add(temp);
 			}
 		}
 		//   for (j = 1 to M) do {Prediction after action A}
 		int m = particleList.size();
+		double dist = this.dist / Localization.MAP_METERS_PER_PIXEL;
 		for (int j = 0; j < m; j++) {
 			// Drifts, not sure exactly how we should do this, paper suggests using numbers selected randomly
 			//  from a gaussian.
-			/*double distDrift;
-			 * double yawDrift;
-			 */
+
 			Particle temp = particleList.get(j);
+			double pose = temp.getPose();
 
 			gmap.clearParticle(temp.getX(),temp.getY());
 
-			double tx = temp.getX() + dx;
-			double ty = temp.getY() + dy;
-			double tp = temp.getPose() + dYaw;
+			double tx = temp.getX() + dist*Math.cos(pose);
+			double ty = temp.getY() - dist*Math.sin(pose);
+			double tp = pose + dYaw;
 			// If we are greater than pi, wrap around to negatives.
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
@@ -117,7 +134,7 @@ public class Localizer extends Thread {
 			}
 
 			//     X^k+1_j = F(X^k_j,A)
-			particleList.set(j, temp);
+			// particleList.set(j, temp);
 			//   end for
 		}
 	}
@@ -126,6 +143,7 @@ public class Localizer extends Thread {
 	 * This will update and normalize the weights
 	 */
 	public void update() {
+	    System.out.println("Updating particle weights...");
 		//   for(j = 1 to M) do {Update the weights}
 		//      W^k+1_j  = W^K_j * W(s,X^k+1_j)
 		//   end for 
@@ -183,7 +201,9 @@ public class Localizer extends Thread {
 	 */
 	public int[] resample() {
 	    System.out.println("Resampling...");
-		int[] index = new int[particleList.size()];
+	    int size = NUM_PARTICLES - particleList.size();
+	    size = size * 2;
+		int[] index = new int[size];
 		// require sumofi=1 to N (Wi) = 1
 		/*	AK - Removing this for now, I'm not positive why we have it in the first place
 		 *    (other than the algorithm said so.) And it is consistently botching stuff up.
@@ -204,22 +224,33 @@ public class Localizer extends Thread {
 		int i = 0;
 		int j = 0;
 		// while( i <= N) do
-		while( i < particleList.size() && j < particleList.size()) {
-			//  if T[i] < Q[j] then
-			if (t[i] < q[j]) { 
-				// Index[i] = j;
-				index[i] = j;
-				// i++
-				i++;
-				j = 0;
-			} else {
-				//  else
-				// j++;
-				j++;
-			}
-			//  end if
-			// end while
-		}
+// 		while( i < particleList.size() && j < particleList.size()) {
+// 			//  if T[i] < Q[j] then
+// 			if (t[i] < q[j]) { 
+// 				// Index[i] = j;
+// 				index[i] = j;
+// 				// i++
+// 				i++;
+// //				j = 0;
+// 			} else {
+// 				//  else
+// 				// j++;
+// 				j++;
+// 			}
+// 			//  end if
+// 			// end while
+// 		}
+
+        // JD - Instead of doing what the book says, let's just take the
+        // particles with the best weights and clone them.
+        // This doesn't fix our problem. WTF
+        Particle[] sorted = new Particle[particleList.size()];
+        Arrays.sort(particleList.toArray(sorted));
+        while (j < index.length && j < sorted.length) {
+            index[j] = particleList.indexOf(sorted[j]);
+            j++;
+        }
+		
 		// Return(Index)
 		return index;
 	}
@@ -234,7 +265,7 @@ public class Localizer extends Thread {
 	 */
 	private double prob(Particle p, double[] ranges) {
 		// dataz intergrayshunz
-		double prob = 1;
+		double prob = 1.1;
 	    for (int i = 0; i < ranges.length; i += ranges.length/10) {
 	        double angle = Math.PI/512 * i - (2*Math.PI/3);
 	        angle += p.getPose();
@@ -247,7 +278,7 @@ public class Localizer extends Thread {
 	       while (distance < 4.5) {
 	    	    j++;
                 double pointX = (int) Math.floor(j * Math.cos(angle) + p.getX());
-                double pointY = (int) Math.floor(j * Math.sin(angle) + p.getY());
+                double pointY = (int) Math.floor(-1*j * Math.sin(angle) + p.getY());
                 // get length of this laser
                 distance = Math.sqrt((j*Math.cos(angle)*j*Math.cos(angle)) + (j*Math.sin(angle)*j*Math.sin(angle))); 
                 distance = distance * Localization.MAP_METERS_PER_PIXEL;
@@ -259,7 +290,7 @@ public class Localizer extends Thread {
                 	// We found obstacle!
                 	//Nao, compare to real readings
                 	// Find relative error to real reading (We can then use this to update probability)
-                	double error = (1.0/NUM_PARTICLES) * (ranges[i] - distance)/ranges[i];
+                	double error = .01*(ranges[i] - distance)/ranges[i];
                 	prob = prob * (1-error);
                 	foundWall = true;
                 }
@@ -358,7 +389,7 @@ public class Localizer extends Thread {
 	 * @param int v - 0 for x, 1 for y, 2 for yaw 
 	 */
 	private double getMean(int v) {
-		double mean = 0;
+		double mean = 0.0;
 		for (Particle p : particleList) {
 			if (v == 0)
 				mean += p.getX();
@@ -381,6 +412,7 @@ public class Localizer extends Thread {
 
 			this.dx = dx;
 			this.dy = dy;
+			this.dist = Math.sqrt(dx*dx + dy*dy);
 			this.dYaw = dYaw;
 			this.ranges = ranges;
 	}
@@ -419,6 +451,7 @@ public class Localizer extends Thread {
 			Particle p = particleList.get(j);
 			if (p.getWeight() < .01/(NUM_PARTICLES * NUM_PARTICLES) || p.getWeight() == 0) {
 			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
+			    oob = oob || p.getX() < 0 || p.getY() < 0;
 			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
 				if (!obs)
 				    gmap.clearParticle(p.getX(),p.getY());
@@ -470,10 +503,10 @@ public class Localizer extends Thread {
 			loops = 0;
 
             Wanderer.sendUpdate(this);
-            System.out.println("Update gotten, PROCESSING");
-            getMean(0);
-            getMean(1);
-            getMean(2);
+            System.out.println("\nUpdate gotten, PROCESSING");
+            meanX = getMean(0);
+            meanY = getMean(1);
+            meanYaw = getMean(2);
             System.out.println("Particles: " + particleList.size());
             System.out.println("X variance = " + getVariance(0));
             System.out.println("Y variance = " + getVariance(1));
