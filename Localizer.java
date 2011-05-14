@@ -15,7 +15,7 @@ public class Localizer extends Thread {
 
 
 	private boolean localized;
-	private double dx,dy,dYaw;
+	private double dx,dy,dYaw, dist;
 	// Doubles for means of all particles
 	private double meanX,meanY,meanYaw;
 	private int[][] map;
@@ -110,16 +110,15 @@ public class Localizer extends Thread {
 		for (int j = 0; j < m; j++) {
 			// Drifts, not sure exactly how we should do this, paper suggests using numbers selected randomly
 			//  from a gaussian.
-			/*double distDrift;
-			 * double yawDrift;
-			 */
+
 			Particle temp = particleList.get(j);
+			double pose = temp.getPose();
 
 			gmap.clearParticle(temp.getX(),temp.getY());
 
-			double tx = temp.getX() + dx;
-			double ty = temp.getY() + dy;
-			double tp = temp.getPose() + dYaw;
+			double tx = temp.getX() + dist*Math.cos(pose);
+			double ty = temp.getY() - dist*Math.sin(pose);
+			double tp = pose + dYaw;
 			// If we are greater than pi, wrap around to negatives.
 			if (tp > Math.PI)
 				tp = tp - 2*Math.PI;
@@ -134,7 +133,7 @@ public class Localizer extends Thread {
 			}
 
 			//     X^k+1_j = F(X^k_j,A)
-			particleList.set(j, temp);
+			// particleList.set(j, temp);
 			//   end for
 		}
 	}
@@ -399,6 +398,7 @@ public class Localizer extends Thread {
 
 			this.dx = dx;
 			this.dy = dy;
+			this.dist = Math.sqrt(dx*dx + dy*dy);
 			this.dYaw = dYaw;
 			this.ranges = ranges;
 	}
@@ -437,7 +437,7 @@ public class Localizer extends Thread {
 			Particle p = particleList.get(j);
 			if (p.getWeight() < .01/(NUM_PARTICLES * NUM_PARTICLES) || p.getWeight() == 0) {
 			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
-			    oob = (p.getX() < 0 || p.getY() < 0);
+			    oob = oob || p.getX() < 0 || p.getY() < 0;
 			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
 				if (!obs)
 				    gmap.clearParticle(p.getX(),p.getY());
