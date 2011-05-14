@@ -214,11 +214,11 @@ public class Localizer extends Thread {
 		 */
 
 		// Q = sumsum(W); 
-		double[] q = cumsum(particleList);
-		// t = rand(N+1);
-		double[] t = randArray(particleList.size()+1); // t is an array of N+1 random numbers
-		// T = sort(t);
-		Arrays.sort(t);
+// 		double[] q = cumsum(particleList);
+// 		// t = rand(N+1);
+// 		double[] t = randArray(particleList.size()+1); // t is an array of N+1 random numbers
+// 		// T = sort(t);
+// 		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
 		int i = 0;
 		// while( i <= N) do
@@ -290,7 +290,9 @@ public class Localizer extends Thread {
                 	// We found obstacle!
                 	//Nao, compare to real readings
                 	// Find relative error to real reading (We can then use this to update probability)
-                	double error = .01*(ranges[i] - distance)/ranges[i];
+                	double error = .01*Math.abs(ranges[i] - distance)/ranges[i];
+                	if (ranges[i] >= 4.5)
+                	    error = .1;
                 	prob = prob * (1-error);
                 	foundWall = true;
                 }
@@ -300,7 +302,7 @@ public class Localizer extends Thread {
 	    	   // If the real laser didn't find a wall either, we safe.
 	    	   if (ranges[i] < 4.5) {
 	    		  double error = ranges[i] / 5;
-	    		  prob = prob * (1-error);
+	    		  prob = prob * (error);
 	    	   }
 	       }
 	    }
@@ -518,7 +520,7 @@ public class Localizer extends Thread {
             System.out.println("Y variance = " + getVariance(1));
             System.out.println("Yaw var    = " + getVariance(2));
             if ((getVariance(0) / NUM_PARTICLES) < 200  && (getVariance(1) / NUM_PARTICLES) < 200) {
-            	localized = true;
+            	//localized = true;
             	expectedLocation = new Particle(meanX,meanY,meanYaw,1);
             }
 		}
