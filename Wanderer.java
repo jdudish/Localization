@@ -42,7 +42,7 @@ public class Wanderer extends Thread {
 	    boolean compound = Wanderer.updateReady;
 	    Wanderer.dx = compound ? Wanderer.dx + x - this.x : x - this.x; 
 	    Wanderer.dy = compound ? Wanderer.dy + y - this.y : y - this.y;
-	    Wanderer.dyaw = compound ? Wanderer.dyaw + this.yaw - yaw : this.yaw - yaw;
+	    Wanderer.dyaw = compound ? Wanderer.dyaw + yaw - this.yaw: yaw - this.yaw;
 	    Wanderer.ranges = ranges;
 	    Wanderer.updateReady = true;
 	    
