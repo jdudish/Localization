@@ -36,7 +36,7 @@ import javaclient3.structures.ranger.*;
     /**
      * Constant for potential field calculation.
      */
-    public final static double OBSTACLE_POTENTIAL_CONSTANT = 0.1;
+    public final static double OBSTACLE_POTENTIAL_CONSTANT = 0.5;
 
     /**
      * Constant for potential field calculation.
@@ -89,8 +89,8 @@ import javaclient3.structures.ranger.*;
         for (int x = 0; x < csMap.length; x++) {
             for (int y = 0; y < csMap[0].length; y++) {
                 if (map[x][y] == 0) {
-                    for (int i = -9; i < 9; i++) {
-                        for (int j = -9; j < 9; j++) {
+                    for (int i = -12; i < 12; i++) {
+                        for (int j = -12; j < 12; j++) {
                             if (x+i < 0 || y+j < 0) continue;
                             if (map[x+i][y+j] != 0)
                                 csMap[x+i][y+j] = 0;

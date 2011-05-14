@@ -149,7 +149,7 @@ import java.util.HashMap;
 	}
 
 	private ArrayList<Point> simplifyPath( ArrayList<Point> path, int maxLen ) {
-		ArrayList<Point> newPath = new ArrayList<Point>();
+		/*ArrayList<Point> newPath = new ArrayList<Point>();
 		Point current = path.remove(0);
 		while( path.size() > 1 ) {
 			if( Math.abs( path.get(0).getX() - current.getX() ) < maxLen &&
@@ -161,9 +161,9 @@ import java.util.HashMap;
 			}
 		}
 		newPath.add( path.remove(0) );
-		return newPath;
+		return newPath;*/
 
-		/*if( path.size() < 3 ) {
+		if( path.size() < 3 ) {
 			return path;
 		}
 		int start = 0;
@@ -199,7 +199,7 @@ import java.util.HashMap;
 				}
 			}
 		}
-		return path;*/
+		return path;
 	}
 	
 	// Main for testing porpoises.
