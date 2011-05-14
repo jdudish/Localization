@@ -201,8 +201,8 @@ public class Localizer extends Thread {
 		// T = sort(t);
 		Arrays.sort(t);
 		//T(N+1) = 1; i = 1; j = 1
-		int i = 1;
-		int j = 1;
+		int i = 0;
+		int j = 0;
 		// while( i <= N) do
 		while( i < particleList.size() && j < particleList.size()) {
 			//  if T[i] < Q[j] then
@@ -211,6 +211,7 @@ public class Localizer extends Thread {
 				index[i] = j;
 				// i++
 				i++;
+				j = 0;
 			} else {
 				//  else
 				// j++;
@@ -257,10 +258,9 @@ public class Localizer extends Thread {
                 if (map[(int) pointX][(int) pointY] == 0) {
                 	// We found obstacle!
                 	//Nao, compare to real readings
-                	// Find relative error to real reading (We can then use this to update probability
-                	double error = (ranges[i] - distance)/ranges[i];
-      //          	prob = prob * (1-error);    // Makes all particles go away
-                    prob = prob * 1/Math.exp(error);
+                	// Find relative error to real reading (We can then use this to update probability)
+                	double error = (1.0/NUM_PARTICLES) * (ranges[i] - distance)/ranges[i];
+                	prob = prob * (1-error);
                 	foundWall = true;
                 }
                 
@@ -417,7 +417,7 @@ public class Localizer extends Thread {
 		boolean obs = false;
 		while( j < particleList.size()) {
 			Particle p = particleList.get(j);
-			if (p.getWeight() < (1.0/(NUM_PARTICLES*NUM_PARTICLES))) {
+			if (p.getWeight() < .01/(NUM_PARTICLES * NUM_PARTICLES) || p.getWeight() == 0) {
 			    oob = (p.getX() >= map.length || p.getY() >= map[0].length);
 			    obs = oob ? true : map[(int)p.getX()][(int)p.getY()] == 0;
 				if (!obs)

@@ -55,6 +55,8 @@ public class Particle {
 		xCoord = x;
 		yCoord = y;
 		pose = h;
+		
+		if (x < 0 || y < 0) weight = 0.0;
 	}
 	public Particle clone() {
 		Particle returnMe = new Particle(xCoord,yCoord,pose,weight);
