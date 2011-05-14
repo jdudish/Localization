@@ -117,8 +117,8 @@ public class Localizer extends Thread {
 
 			gmap.clearParticle(temp.getX(),temp.getY());
 
-			double tx = temp.getX() + dist*Math.cos(pose);
-			double ty = temp.getY() - dist*Math.sin(pose);
+			double tx = temp.getX() + dx/Localization.MAP_METERS_PER_PIXEL;//dist*Math.cos(pose);
+			double ty = temp.getY() - dy/Localization.MAP_METERS_PER_PIXEL;//dist*Math.sin(pose);
 			double tp = pose + dYaw;
 			// If we are greater than pi, wrap around to negatives.
 			if (tp > Math.PI)
