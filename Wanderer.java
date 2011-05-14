@@ -89,9 +89,9 @@ public class Wanderer extends Thread {
 			double leftval = (ranges[569] + ranges[574]) / 2.0;
 			double frontval = (ranges[340] + ranges[345]) / 2.0;
 
-			if (frontval < 0.25) {
+			if (frontval < 0.05) {
 				fwd = 0;
-				if (Math.abs(leftval - rightval) < .05) {
+				if (Math.abs(leftval - rightval) < .025) {
 					turnrate = omega;
 				} else if (leftval > rightval) {
 					turnrate = omega;
@@ -99,11 +99,11 @@ public class Wanderer extends Thread {
 					turnrate = -1 * omega;
 				}
 			} else {
-				fwd = 0.15;
-				if (leftval < 0.25) {
+				fwd = 0.1;
+				if (leftval < 0.05) {
 					fwd = 0.0;
 					turnrate = -1 * omega;
-				} else if (rightval < 0.25) {
+				} else if (rightval < 0.05) {
 					fwd = 0.0;
 					turnrate = omega;
 				}
