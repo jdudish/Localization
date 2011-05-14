@@ -366,7 +366,7 @@ public class Localizer extends Thread {
 	}
 	// we might not need this, not sure yet BROH.
 	private double getStandardDev(int v) {
-		return Math.sqrt(getVariance(v));
+		return Math.sqrt(getVariance(v)/particleList.size());
 	}
 
 	/* 
